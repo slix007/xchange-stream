@@ -24,7 +24,7 @@ public class OkCoinStreamingMarketDataService implements StreamingMarketDataServ
 
     @Override
     public Observable<OrderBook> getOrderBook(CurrencyPair currencyPair, Object... args) {
-        String channel = String.format("ok_%s%s_depth", currencyPair.base.toString().toLowerCase(), currencyPair.counter.toString().toLowerCase());
+        String channel = String.format("ok_sub_spot_%s_depth", currencyPair.base.toString().toLowerCase());
 
         return service.subscribeChannel(channel)
                 .map(s -> {
@@ -37,7 +37,7 @@ public class OkCoinStreamingMarketDataService implements StreamingMarketDataServ
 
     @Override
     public Observable<Ticker> getTicker(CurrencyPair currencyPair, Object... args) {
-        String channel = String.format("ok_%s%s_ticker", currencyPair.base.toString().toLowerCase(), currencyPair.counter.toString().toLowerCase());
+        String channel = String.format("ok_sub_spotusd_%s_ticker", currencyPair.base.toString().toLowerCase());
 
         return service.subscribeChannel(channel)
                 .map(s -> {
@@ -51,7 +51,7 @@ public class OkCoinStreamingMarketDataService implements StreamingMarketDataServ
 
     @Override
     public Observable<Trade> getTrades(CurrencyPair currencyPair, Object... args) {
-        String channel = String.format("ok_%s%s_trades", currencyPair.base.toString().toLowerCase(), currencyPair.counter.toString().toLowerCase());
+        String channel = String.format("ok_sub_spotusd_%s_trades", currencyPair.base.toString().toLowerCase());
 
         return service.subscribeChannel(channel)
                 .map(s -> {
