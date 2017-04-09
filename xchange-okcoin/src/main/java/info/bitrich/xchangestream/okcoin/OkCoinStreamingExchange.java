@@ -26,6 +26,10 @@ public class OkCoinStreamingExchange extends OkCoinExchange implements Streaming
         return streamingService.connect();
     }
 
+    public Completable onClientDisconnect() {
+        return streamingService.onClientDisconnect();
+    }
+
     @Override
     public Completable disconnect() {
         return streamingService.disconnect();
