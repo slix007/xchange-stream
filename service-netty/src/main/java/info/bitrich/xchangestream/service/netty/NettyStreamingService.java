@@ -121,11 +121,11 @@ public abstract class NettyStreamingService<T> {
         });
     }
 
-    public Completable onClientDisconnect() {
+    public Completable onDisconnect() {
         return Completable.create(completable -> {
+            LOG.info("register Completable onDisconnect");
             webSocketChannel.closeFuture().addListener(future -> {
-                LOG.error("onClientDisconnect");
-
+                LOG.error("onDisconnect has been invoked == webSocketChannel has been closed.");
                 completable.onComplete();
             });
         });

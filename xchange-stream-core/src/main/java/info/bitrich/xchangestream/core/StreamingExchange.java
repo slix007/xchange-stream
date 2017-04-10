@@ -12,6 +12,12 @@ public interface StreamingExchange extends Exchange {
     Completable connect();
 
     /**
+     * Register event onDisconnect. It is helpful for re-connections.
+     * @return {@link Completable} that completes upon disconnect event.
+     */
+    Completable onDisconnect();
+
+    /**
      * Disconnect from the WebSocket API.
      *
      * @return {@link Completable} that completes upon successful disconnect.

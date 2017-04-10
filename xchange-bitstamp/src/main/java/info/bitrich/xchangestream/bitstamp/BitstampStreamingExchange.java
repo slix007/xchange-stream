@@ -3,8 +3,11 @@ package info.bitrich.xchangestream.bitstamp;
 import info.bitrich.xchangestream.core.StreamingExchange;
 import info.bitrich.xchangestream.core.StreamingMarketDataService;
 import info.bitrich.xchangestream.service.pusher.PusherStreamingService;
-import io.reactivex.Completable;
+
 import org.knowm.xchange.bitstamp.BitstampExchange;
+import org.knowm.xchange.exceptions.NotAvailableFromExchangeException;
+
+import io.reactivex.Completable;
 
 public class BitstampStreamingExchange extends BitstampExchange implements StreamingExchange {
     private static final String API_KEY = "de504dc5763aeef9ff52";
@@ -25,6 +28,11 @@ public class BitstampStreamingExchange extends BitstampExchange implements Strea
     @Override
     public Completable connect() {
         return streamingService.connect();
+    }
+
+    @Override
+    public Completable onDisconnect() {
+        throw new NotAvailableFromExchangeException();
     }
 
     @Override

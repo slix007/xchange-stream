@@ -3,8 +3,11 @@ package info.bitrich.xchangestream.poloniex;
 import info.bitrich.xchangestream.core.StreamingExchange;
 import info.bitrich.xchangestream.core.StreamingMarketDataService;
 import info.bitrich.xchangestream.service.wamp.WampStreamingService;
-import io.reactivex.Completable;
+
+import org.knowm.xchange.exceptions.NotYetImplementedForExchangeException;
 import org.knowm.xchange.poloniex.PoloniexExchange;
+
+import io.reactivex.Completable;
 
 public class PoloniexStreamingExchange extends PoloniexExchange implements StreamingExchange {
     private static final String API_URI = "wss://api.poloniex.com";
@@ -26,6 +29,11 @@ public class PoloniexStreamingExchange extends PoloniexExchange implements Strea
     @Override
     public Completable connect() {
         return streamingService.connect();
+    }
+
+    @Override
+    public Completable onDisconnect() {
+        throw new NotYetImplementedForExchangeException();
     }
 
     @Override

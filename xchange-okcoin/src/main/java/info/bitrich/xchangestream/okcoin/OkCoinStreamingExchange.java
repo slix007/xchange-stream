@@ -2,8 +2,10 @@ package info.bitrich.xchangestream.okcoin;
 
 import info.bitrich.xchangestream.core.StreamingExchange;
 import info.bitrich.xchangestream.core.StreamingMarketDataService;
-import io.reactivex.Completable;
+
 import org.knowm.xchange.okcoin.OkCoinExchange;
+
+import io.reactivex.Completable;
 
 public class OkCoinStreamingExchange extends OkCoinExchange implements StreamingExchange {
     private static final String API_URI = "wss://real.okcoin.com:10440/websocket/okcoinapi";
@@ -26,8 +28,9 @@ public class OkCoinStreamingExchange extends OkCoinExchange implements Streaming
         return streamingService.connect();
     }
 
-    public Completable onClientDisconnect() {
-        return streamingService.onClientDisconnect();
+    @Override
+    public Completable onDisconnect() {
+        return streamingService.onDisconnect();
     }
 
     @Override
