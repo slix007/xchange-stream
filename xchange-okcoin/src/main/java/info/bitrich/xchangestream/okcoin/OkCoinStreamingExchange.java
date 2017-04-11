@@ -5,6 +5,8 @@ import info.bitrich.xchangestream.core.StreamingMarketDataService;
 
 import org.knowm.xchange.okcoin.OkCoinExchange;
 
+import java.util.concurrent.TimeUnit;
+
 import io.reactivex.Completable;
 
 /**
@@ -31,7 +33,7 @@ public class OkCoinStreamingExchange extends OkCoinExchange implements Streaming
 
     @Override
     public Completable connect() {
-        return streamingService.connect();
+        return streamingService.connect(1L, TimeUnit.MINUTES);
     }
 
     @Override

@@ -10,6 +10,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
@@ -51,7 +52,7 @@ public abstract class NettyStreamingService<T> {
         }
     }
 
-    public Completable connect() {
+    public Completable connect(long heartbeatInterval, TimeUnit heartbeatTimeUnit) {
         return Completable.create(completable -> {
             try {
                 LOG.info("Connecting to {}://{}:{}{}", uri.getScheme(), uri.getHost(), uri.getPort(), uri.getPath());
@@ -113,7 +114,13 @@ public abstract class NettyStreamingService<T> {
 
                 b.connect(uri.getHost(), port).addListener((ChannelFuture future) -> {
                     webSocketChannel = future.channel();
-                    handler.handshakeFuture().addListener(future1 -> completable.onComplete());
+                    handler.handshakeFuture().addListener(future1 -> {
+                        completable.onComplete();
+                        // Schedule Heartbeat
+                        webSocketChannel.eventLoop().scheduleAtFixedRate(() -> sendMessage("ping"),
+                                heartbeatInterval, heartbeatInterval, heartbeatTimeUnit);
+
+                    });
                 });
             } catch (Exception throwable) {
                 completable.onError(throwable);
