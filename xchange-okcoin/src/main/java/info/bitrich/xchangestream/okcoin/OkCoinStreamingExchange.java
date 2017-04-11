@@ -7,6 +7,12 @@ import org.knowm.xchange.okcoin.OkCoinExchange;
 
 import io.reactivex.Completable;
 
+/**
+ * OkCoin keeps the channel open about 5 min.
+ * After this time you'll receive {@link #onDisconnect()} event.
+ *
+ * To avoid disconnection we have to send keepalive heartbeats(ping).
+ */
 public class OkCoinStreamingExchange extends OkCoinExchange implements StreamingExchange {
     private static final String API_URI = "wss://real.okcoin.com:10440/websocket/okcoinapi";
 
