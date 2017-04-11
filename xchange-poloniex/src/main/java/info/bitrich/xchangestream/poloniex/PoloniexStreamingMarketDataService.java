@@ -1,8 +1,12 @@
 package info.bitrich.xchangestream.poloniex;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 
 import info.bitrich.xchangestream.core.StreamingMarketDataServiceExtended;
+import info.bitrich.xchangestream.poloniex.dto.PoloniexWebSocketDepth;
 import info.bitrich.xchangestream.service.wamp.WampStreamingService;
 
 import org.knowm.xchange.currency.CurrencyPair;
@@ -19,7 +23,10 @@ import org.knowm.xchange.poloniex.dto.marketdata.PoloniexMarketData;
 import org.knowm.xchange.poloniex.dto.marketdata.PoloniexTicker;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import io.reactivex.Observable;
 
@@ -37,77 +44,51 @@ public class PoloniexStreamingMarketDataService implements StreamingMarketDataSe
 
     @Override
     public Observable<OrderBookUpdate> getOrderBookUpdate(CurrencyPair currencyPair, Object... args) {
-//        Incremental data return (Return full data for the first query)
-//        Delete (BTC/LTC amount is 0)
-//        Edit (Same price(rate), different amount)
-//        Add (Price(rate) inexist)
         // Poloniex uses USDT_BTC (instead of BTC_USD)
         String orderBookChannel = String.format("%s_%s", currencyPair.counter.getSymbol(), currencyPair.base.getSymbol());
-        // Looks like Poloniex sends only updates to orders, but not all of them
+
         return streamingService.subscribeChannel(orderBookChannel)
-                .map(pubSubData -> {
+                .flatMap(pubSubData -> {
                     // documentation:
                     // [{data: {rate: '0.00300888', type: 'bid', amount: '3.32349029'},type: 'orderBookModify'}]
                     // [{data: {rate: '0.00311164', type: 'ask' },type: 'orderBookRemove'}]
+                    // [{"type":"orderBookRemove","data":{"type":"bid","rate":"1209.91547960"}},{"type":"newTrade","data":{"amount":"0.00082647","date":"2017-04-11 05:10:02","rate":"1209.91547960","total":"0.99995884","tradeID":"2490976","type":"sell"}}]
 
                     // debugging pubSubData:
                     // details: {}
                     // arguments: [{"type":"orderBookModify","data":{"type":"bid","rate":"1134.00000001","amount":"1.41239744"}}]
                     // keywordArguments: {"seq":87216685}
 
-                    // TODO use object mapper
-//                    ObjectMapper mapper = new ObjectMapper();
-//                    mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-//                    mapper.treeToValue(pubSubData.arguments())
-//                    List<PoloniexWebSocketDepth> depth = mapper.readValue(pubSubData.arguments().asText(),
-//                            mapper.getTypeFactory().constructCollectionType(List.class, PoloniexWebSocketDepth.class));
-//                    PoloniexWebSocketDepth poloniexDepth = mapper.treeToValue(pu.get("data"), PoloniexWebSocketDepth.class);
+                    ObjectMapper mapper = new ObjectMapper();
+                    mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+                    final ArrayNode arguments = pubSubData.arguments();
+                    List<PoloniexWebSocketDepth> depthList = new ArrayList<>();
+                    for (final JsonNode objNode : arguments) {
+                        final PoloniexWebSocketDepth depth =
+                                mapper.treeToValue(objNode, PoloniexWebSocketDepth.class);
+                        depthList.add(depth);
+                    }
 
-//                    List<PoloniexWebSocketDepth> myObjects = mapper.readValue(pubSubData.arguments().asText(),
-//                            new TypeReference<List<PoloniexWebSocketDepth>>(){});
+                    // TODO optimize it using only rxJava
+                    final List<OrderBookUpdate> updateList = depthList.stream()
+                            .map(depth -> {
 
-                    StringBuilder inputUpdateType = new StringBuilder();
-                    final StringBuilder inputRate = new StringBuilder();
-                    final StringBuilder inputOrderType = new StringBuilder();
-                    final StringBuilder inputAmount = new StringBuilder();
+//                                System.out.println(String.format("%s:%s", depth.getType(), depth.getData().getRate()));
 
-                    final JsonNode jsonNode = pubSubData.arguments().get(0);
-                    jsonNode.fields().forEachRemaining(stringJsonNodeEntry -> {
-                        switch (stringJsonNodeEntry.getKey()) {
-                            case "type":
-                                inputUpdateType.append(stringJsonNodeEntry.getValue().asText());
-                                break;
-                            case "data":
-                                final JsonNode dataNode = stringJsonNodeEntry.getValue();
-                                dataNode.fields().forEachRemaining(dataField -> {
-                                    switch (dataField.getKey()) {
-                                        case "type":
-                                            inputOrderType.append(dataField.getValue().asText());
-                                            break;
-                                        case "rate":
-                                            inputRate.append(dataField.getValue().asText());
-                                            break;
-                                        case "amount":
-                                            inputAmount.append(dataField.getValue().asText());
-                                            break;
-                                    }
-                                });
-                                break;
-                        }
-                    });
+                                final BigDecimal amount = depth.getData().getAmount() != null
+                                        ? depth.getData().getAmount()
+                                        : new BigDecimal(0);
+                                return new OrderBookUpdate(
+                                        depth.getData().getType().equals("bid") ? Order.OrderType.BID : Order.OrderType.ASK,
+                                        amount,
+                                        currencyPair,
+                                        new BigDecimal(depth.getData().getRate().toString()),
+                                        new Date(),
+                                        amount
+                                );
+                            }).collect(Collectors.toList());
 
-                    // "bid" or "ask"
-                    Order.OrderType orderType = inputOrderType.equals("bid") ? Order.OrderType.BID : Order.OrderType.ASK;
-
-                    final OrderBookUpdate orderBookUpdate = new OrderBookUpdate(
-                            orderType,
-                            new BigDecimal(inputAmount.toString().length() > 0 ? inputAmount.toString() : "0"),
-                            currencyPair,
-                            new BigDecimal(inputRate.toString()),
-                            new Date(),
-                            new BigDecimal(inputAmount.toString().length() > 0 ? inputAmount.toString() : "0")
-                    );
-                    return orderBookUpdate;
+                    return Observable.fromIterable(updateList);
                 });
     }
 

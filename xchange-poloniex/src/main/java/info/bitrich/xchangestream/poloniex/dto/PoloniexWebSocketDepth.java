@@ -4,9 +4,9 @@ package info.bitrich.xchangestream.poloniex.dto;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
@@ -16,12 +16,19 @@ import javax.annotation.Generated;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Generated("org.jsonschema2pojo")
-@JsonPropertyOrder({"type", "data"})
+//@JsonPropertyOrder({"type", "data"})
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class PoloniexWebSocketDepth {
 
     // [{data: {rate: '0.00300888', type: 'bid', amount: '3.32349029'},type: 'orderBookModify'}]
     // [{data: {rate: '0.00311164', type: 'ask' },type: 'orderBookRemove'}]
-/*
+
+    // [{"type":"orderBookRemove","data":{"type":"bid","rate":"1209.91547960"}},
+    // {"type":"newTrade",
+    //      "data":{"amount":"0.00082647","date":"2017-04-11 05:10:02","rate":"1209.91547960","total":"0.99995884","tradeID":"2490976","type":"sell"}
+    // }]
+
+
     @JsonProperty("type")
     private String type;
 
@@ -31,22 +38,18 @@ public class PoloniexWebSocketDepth {
     @JsonIgnore
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
-    @JsonProperty("type")
     public String getType() {
         return type;
     }
 
-    @JsonProperty("type")
     public void setType(String type) {
         this.type = type;
     }
 
-    @JsonProperty("data")
     public DataObj getData() {
         return dataObj;
     }
 
-    @JsonProperty("data")
     public void setData(DataObj data) {
         this.dataObj = data;
     }
@@ -61,6 +64,7 @@ public class PoloniexWebSocketDepth {
         this.additionalProperties.put(name, value);
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class DataObj {
         @JsonProperty("rate")
         private BigDecimal rate;
@@ -110,6 +114,6 @@ public class PoloniexWebSocketDepth {
             this.additionalProperties.put(name, value);
         }
     }
-*/
+
 
 }
