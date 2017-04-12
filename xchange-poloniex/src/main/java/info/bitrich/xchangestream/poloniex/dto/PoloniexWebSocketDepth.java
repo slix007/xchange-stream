@@ -113,7 +113,24 @@ public class PoloniexWebSocketDepth {
 
             this.additionalProperties.put(name, value);
         }
+
+        @Override
+        public String toString() {
+            return "DataObj{" +
+                    "rate=" + rate +
+                    ", amount=" + amount +
+                    ", type='" + type + '\'' +
+                    ", additionalProperties=" + additionalProperties +
+                    '}';
+        }
     }
 
-
+    @Override
+    public String toString() {
+        return "PoloniexWebSocketDepth{" +
+                "type='" + type + '\'' +
+                ", dataObj=" + dataObj +
+                ", additionalProperties=" + additionalProperties +
+                '}';
+    }
 }

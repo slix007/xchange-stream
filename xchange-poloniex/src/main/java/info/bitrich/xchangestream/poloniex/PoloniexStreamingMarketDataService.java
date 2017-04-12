@@ -66,7 +66,18 @@ public class PoloniexStreamingMarketDataService implements StreamingMarketDataSe
                     for (final JsonNode objNode : arguments) {
                         final PoloniexWebSocketDepth depth =
                                 mapper.treeToValue(objNode, PoloniexWebSocketDepth.class);
-                        depthList.add(depth);
+
+                        if (depth.getType().equals("orderBookModify")
+                                || depth.getType().equals("orderBookRemove")) {
+                            System.out.println("Depth " + depth.getType()
+                                    + ", " + depth.getData().getRate()
+                                    + ", " + depth.getData().getAmount());
+                            depthList.add(depth);
+                        } else {
+                            System.out.println("WARNING " + depth.toString());
+                        }
+
+
                     }
 
                     // TODO optimize it using only rxJava

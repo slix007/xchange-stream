@@ -25,7 +25,9 @@ public abstract class JsonNettyStreamingService extends NettyStreamingService<Js
         try {
             jsonNode = objectMapper.readTree(message);
         } catch (IOException e) {
-            LOG.error("Error parsing incoming message to JSON: {}", message);
+            if (!message.equals("pong")) {
+                LOG.error("Error parsing incoming message to JSON: {}", message);
+            }
             return;
         }
 
