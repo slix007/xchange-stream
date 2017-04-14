@@ -5,14 +5,12 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 
-import info.bitrich.xchangestream.core.StreamingMarketDataServiceExtended;
-import info.bitrich.xchangestream.poloniex.dto.PoloniexWebSocketDepth;
+import info.bitrich.xchangestream.core.StreamingMarketDataService;
+import info.bitrich.xchangestream.poloniex.incremental.PoloniexWebSocketDepth;
 import info.bitrich.xchangestream.service.wamp.WampStreamingService;
 
 import org.knowm.xchange.currency.CurrencyPair;
-import org.knowm.xchange.dto.Order;
 import org.knowm.xchange.dto.marketdata.OrderBook;
-import org.knowm.xchange.dto.marketdata.OrderBookUpdate;
 import org.knowm.xchange.dto.marketdata.Ticker;
 import org.knowm.xchange.dto.marketdata.Trade;
 import org.knowm.xchange.exceptions.NotAvailableFromExchangeException;
@@ -21,16 +19,18 @@ import org.knowm.xchange.poloniex.PoloniexAdapters;
 import org.knowm.xchange.poloniex.PoloniexUtils;
 import org.knowm.xchange.poloniex.dto.marketdata.PoloniexMarketData;
 import org.knowm.xchange.poloniex.dto.marketdata.PoloniexTicker;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import io.reactivex.Observable;
 
-public class PoloniexStreamingMarketDataService implements StreamingMarketDataServiceExtended {
+public class PoloniexStreamingMarketDataService implements StreamingMarketDataService {
+    private static final Logger LOG = LoggerFactory.getLogger(PoloniexStreamingMarketDataService.class);
+
     private final WampStreamingService streamingService;
 
     public PoloniexStreamingMarketDataService(WampStreamingService streamingService) {
@@ -42,8 +42,7 @@ public class PoloniexStreamingMarketDataService implements StreamingMarketDataSe
         throw new NotAvailableFromExchangeException();
     }
 
-    @Override
-    public Observable<OrderBookUpdate> getOrderBookUpdate(CurrencyPair currencyPair, Object... args) {
+    public Observable<PoloniexWebSocketDepth> getOrderBookUpdate(CurrencyPair currencyPair, Object... args) {
         // Poloniex uses USDT_BTC (instead of BTC_USD)
         String orderBookChannel = String.format("%s_%s", currencyPair.counter.getSymbol(), currencyPair.base.getSymbol());
 
@@ -69,37 +68,44 @@ public class PoloniexStreamingMarketDataService implements StreamingMarketDataSe
 
                         if (depth.getType().equals("orderBookModify")
                                 || depth.getType().equals("orderBookRemove")) {
-                            System.out.println("Depth " + depth.getType()
+                            LOG.debug("Depth " + depth.getType()
                                     + ", " + depth.getData().getRate()
-                                    + ", " + depth.getData().getAmount());
+                                    + ", " + depth.getData().getAmount()
+                                    + ", " + depth.getData().getType()
+                                    + ", " + depth.getAdditionalProperties()
+                                    + ", " + depth.getData().getAdditionalProperties()
+                            );
                             depthList.add(depth);
                         } else {
-                            System.out.println("WARNING " + depth.toString());
+                            // ignore trades
+                            // LOG.debug("WARNING " + depth.toString());
                         }
-
 
                     }
 
-                    // TODO optimize it using only rxJava
-                    final List<OrderBookUpdate> updateList = depthList.stream()
-                            .map(depth -> {
+                    return Observable.fromIterable(depthList);
 
-//                                System.out.println(String.format("%s:%s", depth.getType(), depth.getData().getRate()));
 
-                                final BigDecimal amount = depth.getData().getAmount() != null
-                                        ? depth.getData().getAmount()
-                                        : new BigDecimal(0);
-                                return new OrderBookUpdate(
-                                        depth.getData().getType().equals("bid") ? Order.OrderType.BID : Order.OrderType.ASK,
-                                        amount,
-                                        currencyPair,
-                                        new BigDecimal(depth.getData().getRate().toString()),
-                                        new Date(),
-                                        amount
-                                );
-                            }).collect(Collectors.toList());
-
-                    return Observable.fromIterable(updateList);
+//                    // TODO optimize it using only rxJava
+//                    final List<OrderBookUpdate> updateList = depthList.stream()
+//                            .map(depth -> {
+//
+////                                System.out.println(String.format("%s:%s", depth.getType(), depth.getData().getRate()));
+//
+//                                final BigDecimal amount = depth.getData().getAmount() != null
+//                                        ? depth.getData().getAmount()
+//                                        : new BigDecimal(0);
+//                                return new OrderBookUpdate(
+//                                        depth.getData().getType().equals("bid") ? Order.OrderType.BID : Order.OrderType.ASK,
+//                                        amount,
+//                                        currencyPair,
+//                                        new BigDecimal(depth.getData().getRate().toString()),
+//                                        new Date(),
+//                                        amount
+//                                );
+//                            }).collect(Collectors.toList());
+//
+//                    return Observable.fromIterable(updateList);
                 });
     }
 

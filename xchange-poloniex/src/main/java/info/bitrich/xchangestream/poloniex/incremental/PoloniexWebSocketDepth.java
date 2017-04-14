@@ -1,4 +1,4 @@
-package info.bitrich.xchangestream.poloniex.dto;
+package info.bitrich.xchangestream.poloniex.incremental;
 
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
