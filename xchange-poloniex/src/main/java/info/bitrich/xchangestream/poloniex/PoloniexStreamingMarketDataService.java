@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import info.bitrich.xchangestream.core.StreamingMarketDataService;
 import info.bitrich.xchangestream.poloniex.incremental.PoloniexWebSocketDepth;
@@ -57,6 +58,7 @@ public class PoloniexStreamingMarketDataService implements StreamingMarketDataSe
                     // details: {}
                     // arguments: [{"type":"orderBookModify","data":{"type":"bid","rate":"1134.00000001","amount":"1.41239744"}}]
                     // keywordArguments: {"seq":87216685}
+                    final long seq = pubSubData.keywordArguments().findValue("seq").asLong();
 
                     ObjectMapper mapper = new ObjectMapper();
                     mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -65,6 +67,7 @@ public class PoloniexStreamingMarketDataService implements StreamingMarketDataSe
                     for (final JsonNode objNode : arguments) {
                         final PoloniexWebSocketDepth depth =
                                 mapper.treeToValue(objNode, PoloniexWebSocketDepth.class);
+                        depth.setSequence(seq);
 
                         if (depth.getType().equals("orderBookModify")
                                 || depth.getType().equals("orderBookRemove")) {

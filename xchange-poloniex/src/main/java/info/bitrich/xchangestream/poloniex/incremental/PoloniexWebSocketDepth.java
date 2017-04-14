@@ -35,6 +35,8 @@ public class PoloniexWebSocketDepth {
     @JsonProperty("data")
     private DataObj dataObj;
 
+    private Long sequence;
+
     @JsonIgnore
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
@@ -52,6 +54,14 @@ public class PoloniexWebSocketDepth {
 
     public void setData(DataObj data) {
         this.dataObj = data;
+    }
+
+    public Long getSequence() {
+        return sequence;
+    }
+
+    public void setSequence(Long sequence) {
+        this.sequence = sequence;
     }
 
     @JsonAnyGetter
