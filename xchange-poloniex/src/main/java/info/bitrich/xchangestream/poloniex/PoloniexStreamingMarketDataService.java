@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import info.bitrich.xchangestream.core.StreamingMarketDataService;
 import info.bitrich.xchangestream.poloniex.incremental.PoloniexWebSocketDepth;
@@ -59,6 +58,7 @@ public class PoloniexStreamingMarketDataService implements StreamingMarketDataSe
                     // arguments: [{"type":"orderBookModify","data":{"type":"bid","rate":"1134.00000001","amount":"1.41239744"}}]
                     // keywordArguments: {"seq":87216685}
                     final long seq = pubSubData.keywordArguments().findValue("seq").asLong();
+                    LOG.debug(String.valueOf(seq) + ": " + pubSubData.arguments().toString());
 
                     ObjectMapper mapper = new ObjectMapper();
                     mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -71,13 +71,14 @@ public class PoloniexStreamingMarketDataService implements StreamingMarketDataSe
 
                         if (depth.getType().equals("orderBookModify")
                                 || depth.getType().equals("orderBookRemove")) {
-                            LOG.debug("Depth " + depth.getType()
-                                    + ", " + depth.getData().getRate()
-                                    + ", " + depth.getData().getAmount()
-                                    + ", " + depth.getData().getType()
-                                    + ", " + depth.getAdditionalProperties()
-                                    + ", " + depth.getData().getAdditionalProperties()
-                            );
+//                            LOG.debug("Depth " + depth.getType()
+//                                    + ", " + depth.getData().getRate()
+//                                    + ", " + depth.getData().getAmount()
+//                                    + ", " + depth.getData().getType()
+//                                    + ", " + seq
+//                                    + ", " + depth.getAdditionalProperties()
+//                                    + ", " + depth.getData().getAdditionalProperties()
+//                            );
                             depthList.add(depth);
                         } else {
                             // ignore trades
