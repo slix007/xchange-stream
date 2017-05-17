@@ -3,6 +3,7 @@ package info.bitrich.xchangestream.okcoin;
 import info.bitrich.xchangestream.core.StreamingAccountService;
 import info.bitrich.xchangestream.core.StreamingExchange;
 import info.bitrich.xchangestream.core.StreamingMarketDataService;
+import info.bitrich.xchangestream.core.StreamingTradingService;
 
 import org.knowm.xchange.exceptions.NotYetImplementedForExchangeException;
 import org.knowm.xchange.okcoin.OkCoinExchange;
@@ -55,6 +56,11 @@ public class OkCoinStreamingExchange extends OkCoinExchange implements Streaming
 
     @Override
     public StreamingAccountService getStreamingAccountService() {
+        throw new NotYetImplementedForExchangeException();
+    }
+
+    @Override
+    public StreamingTradingService getStreamingTradingService() {
         throw new NotYetImplementedForExchangeException();
     }
 }

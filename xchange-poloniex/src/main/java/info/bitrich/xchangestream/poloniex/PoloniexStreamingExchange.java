@@ -3,8 +3,10 @@ package info.bitrich.xchangestream.poloniex;
 import info.bitrich.xchangestream.core.StreamingAccountService;
 import info.bitrich.xchangestream.core.StreamingExchange;
 import info.bitrich.xchangestream.core.StreamingMarketDataService;
+import info.bitrich.xchangestream.core.StreamingTradingService;
 import info.bitrich.xchangestream.service.wamp.WampStreamingService;
 
+import org.knowm.xchange.exceptions.NotAvailableFromExchangeException;
 import org.knowm.xchange.exceptions.NotYetImplementedForExchangeException;
 import org.knowm.xchange.poloniex.PoloniexExchange;
 
@@ -50,5 +52,10 @@ public class PoloniexStreamingExchange extends PoloniexExchange implements Strea
     @Override
     public StreamingAccountService getStreamingAccountService() {
         throw new NotYetImplementedForExchangeException();
+    }
+
+    @Override
+    public StreamingTradingService getStreamingTradingService() {
+        throw new NotAvailableFromExchangeException();
     }
 }

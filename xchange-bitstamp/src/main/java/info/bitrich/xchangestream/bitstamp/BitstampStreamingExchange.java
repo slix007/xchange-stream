@@ -3,6 +3,7 @@ package info.bitrich.xchangestream.bitstamp;
 import info.bitrich.xchangestream.core.StreamingAccountService;
 import info.bitrich.xchangestream.core.StreamingExchange;
 import info.bitrich.xchangestream.core.StreamingMarketDataService;
+import info.bitrich.xchangestream.core.StreamingTradingService;
 import info.bitrich.xchangestream.service.pusher.PusherStreamingService;
 
 import org.knowm.xchange.bitstamp.BitstampExchange;
@@ -48,6 +49,11 @@ public class BitstampStreamingExchange extends BitstampExchange implements Strea
 
     @Override
     public StreamingAccountService getStreamingAccountService() {
+        throw new NotAvailableFromExchangeException();
+    }
+
+    @Override
+    public StreamingTradingService getStreamingTradingService() {
         throw new NotAvailableFromExchangeException();
     }
 }

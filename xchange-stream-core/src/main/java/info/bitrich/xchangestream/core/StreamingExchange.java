@@ -34,4 +34,10 @@ public interface StreamingExchange extends Exchange {
      * Returns service that can be used to access account data.
      */
     StreamingAccountService getStreamingAccountService();
+
+    /**
+     * Returns service that can be used to access account data.
+     */
+    StreamingTradingService getStreamingTradingService();
+
 }
