@@ -1,5 +1,6 @@
 package info.bitrich.xchange.coinmate;
 
+import info.bitrich.xchangestream.core.StreamingAccountService;
 import info.bitrich.xchangestream.core.StreamingExchange;
 import info.bitrich.xchangestream.core.StreamingMarketDataService;
 import info.bitrich.xchangestream.service.pusher.PusherStreamingService;
@@ -43,5 +44,10 @@ public class CoinmateStreamingExchange extends CoinmateExchange implements Strea
     @Override
     public StreamingMarketDataService getStreamingMarketDataService() {
         return streamingMarketDataService;
+    }
+
+    @Override
+    public StreamingAccountService getStreamingAccountService() {
+        throw new NotAvailableFromExchangeException();
     }
 }

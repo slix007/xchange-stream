@@ -1,8 +1,10 @@
 package info.bitrich.xchangestream.okcoin;
 
+import info.bitrich.xchangestream.core.StreamingAccountService;
 import info.bitrich.xchangestream.core.StreamingExchange;
 import info.bitrich.xchangestream.core.StreamingMarketDataService;
 
+import org.knowm.xchange.exceptions.NotYetImplementedForExchangeException;
 import org.knowm.xchange.okcoin.OkCoinExchange;
 
 import java.util.concurrent.TimeUnit;
@@ -49,5 +51,10 @@ public class OkCoinStreamingExchange extends OkCoinExchange implements Streaming
     @Override
     public StreamingMarketDataService getStreamingMarketDataService() {
         return streamingMarketDataService;
+    }
+
+    @Override
+    public StreamingAccountService getStreamingAccountService() {
+        throw new NotYetImplementedForExchangeException();
     }
 }
