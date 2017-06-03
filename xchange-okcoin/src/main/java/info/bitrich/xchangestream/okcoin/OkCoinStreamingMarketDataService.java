@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import info.bitrich.xchangestream.core.StreamingMarketDataServiceExtended;
-import info.bitrich.xchangestream.okcoin.dto.OkCoinWebSocketTrade;
 
 import org.knowm.xchange.currency.CurrencyPair;
 import org.knowm.xchange.dto.Order;
@@ -17,7 +16,15 @@ import org.knowm.xchange.okcoin.OkCoinAdapters;
 import org.knowm.xchange.okcoin.dto.marketdata.OkCoinDepth;
 import org.knowm.xchange.okcoin.dto.marketdata.OkCoinTicker;
 import org.knowm.xchange.okcoin.dto.marketdata.OkCoinTickerResponse;
+import org.knowm.xchange.okcoin.dto.marketdata.OkCoinTrade;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -104,10 +111,26 @@ public class OkCoinStreamingMarketDataService implements StreamingMarketDataServ
                     String[][] trades = mapper.treeToValue(s.get("data"), String[][].class);
 
                     // I don't know how to parse this array of arrays in Jacson.
-                    OkCoinWebSocketTrade[] okCoinTrades = new OkCoinWebSocketTrade[trades.length];
+                    OkCoinTrade[] okCoinTrades = new OkCoinTrade[trades.length];
                     for (int i = 0; i < trades.length; ++i) {
-                        OkCoinWebSocketTrade okCoinWebSocketTrade = new OkCoinWebSocketTrade(trades[i]);
-                        okCoinTrades[i] = okCoinWebSocketTrade;
+                        final String[] items = trades[i];
+                        // parsing
+                        final LocalTime localTime = LocalTime.parse(items[3], DateTimeFormatter.ofPattern("HH:mm:ss"));
+                        final LocalDateTime localDateTime = LocalDate.now().atTime(localTime);
+                        final ZoneId zoneId = ZoneOffset.systemDefault();
+                        final long epochSecond = localDateTime.atZone(zoneId).toEpochSecond();
+
+                        final Long id = Long.valueOf(items[0]);
+                        final BigDecimal price = new BigDecimal(items[1]);
+                        final BigDecimal amount = new BigDecimal(items[2]);
+                        final String type = items[4]; //ask,bid
+
+                        OkCoinTrade okCoinTrade = new OkCoinTrade(epochSecond,
+                                price,
+                                amount,
+                                id,
+                                type);
+                        okCoinTrades[i] = okCoinTrade;
                     }
 
                     return OkCoinAdapters.adaptTrades(okCoinTrades, currencyPair);

@@ -23,6 +23,7 @@ public class OkCoinStreamingExchange extends OkCoinExchange implements Streaming
 
     private final OkCoinStreamingService streamingService;
     private OkCoinStreamingMarketDataService streamingMarketDataService;
+    private OkCoinStreamingTradingService streamingTradingService;
 
     public OkCoinStreamingExchange() {
         streamingService = new OkCoinStreamingService(API_URI);
@@ -32,6 +33,7 @@ public class OkCoinStreamingExchange extends OkCoinExchange implements Streaming
     protected void initServices() {
         super.initServices();
         streamingMarketDataService = new OkCoinStreamingMarketDataService(streamingService);
+        streamingTradingService = new OkCoinStreamingTradingService(streamingService);
     }
 
     @Override
@@ -61,6 +63,6 @@ public class OkCoinStreamingExchange extends OkCoinExchange implements Streaming
 
     @Override
     public StreamingTradingService getStreamingTradingService() {
-        throw new NotYetImplementedForExchangeException();
+        return streamingTradingService;
     }
 }
