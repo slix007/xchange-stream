@@ -18,5 +18,5 @@ public interface StreamingTradingService {
      * @return {@link Observable} that emits {@link org.knowm.xchange.dto.trade.OpenOrders} when exchange sends the
      * update.
      */
-    Observable<OpenOrders> getOpenOrdersObservable();
+    Observable<OpenOrders> getOpenOrdersObservable(Object... args);
 }

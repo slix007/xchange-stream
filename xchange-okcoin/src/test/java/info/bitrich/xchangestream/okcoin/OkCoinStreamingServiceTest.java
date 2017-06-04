@@ -41,4 +41,12 @@ public class OkCoinStreamingServiceTest {
 
         assertThat(channel).isEqualTo("ok_btcusd_depth");
     }
+
+    @Test
+    public void testGetSubscribeMessageWithParams() throws Exception {
+        String subscribeMessage = streamingService.getSubscribeMessage("ok_spotusd_orderinfo", "123", "124", "btc_usd", "125");
+        String expected = new String(Files.readAllBytes(Paths.get(ClassLoader.getSystemResource("subscribe-params.json").toURI())));
+        assertThat(subscribeMessage).isEqualTo(expected);
+    }
+
 }
