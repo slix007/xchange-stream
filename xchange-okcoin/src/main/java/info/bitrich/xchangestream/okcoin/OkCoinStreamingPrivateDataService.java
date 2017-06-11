@@ -21,6 +21,7 @@ import org.knowm.xchange.dto.trade.LimitOrder;
 import org.knowm.xchange.okcoin.OkCoinAdapters;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,7 +51,10 @@ public class OkCoinStreamingPrivateDataService implements StreamingPrivateDataSe
         // or "channel": "ok_sub_spotusd_trades"
         // or "channel": "ok_sub_spotusd_userinfo",
         // Successful response for all: [{"data":{"result":"true"},"channel":"login"}]
-        return service.subscribeChannel("ok_sub_spotusd_trades", apiKey, sign)
+        return service.subscribeBatchChannels("ok_sub_spotusd_trades",
+                Arrays.asList("ok_sub_spotusd_trades", "ok_sub_spotusd_userinfo"),
+                apiKey,
+                sign)
                 .map(this::parseResult);
     }
 
@@ -63,21 +67,9 @@ public class OkCoinStreamingPrivateDataService implements StreamingPrivateDataSe
         List<LimitOrder> trades = new ArrayList<>();
         AccountInfo accountInfo = null;
 
-        if (jsonNode.isArray()) {
-            for (final JsonNode objNode : jsonNode) {
-                accountInfo = parseChannelResponse(mapper, trades, accountInfo, objNode);
-            }
-        } else {
-            accountInfo = parseChannelResponse(mapper, trades, accountInfo, jsonNode);
-        }
-
-        return new PrivateData(trades, accountInfo);
-    }
-
-    private AccountInfo parseChannelResponse(ObjectMapper mapper, List<LimitOrder> trades, AccountInfo accountInfo, JsonNode objNode) throws com.fasterxml.jackson.core.JsonProcessingException {
-        final JsonNode channel = objNode.get("channel");
+        final JsonNode channel = jsonNode.get("channel");
         if (channel != null) {
-            final JsonNode dataNode = objNode.get("data");
+            final JsonNode dataNode = jsonNode.get("data");
             switch (channel.asText()) {
                 case "ok_sub_spotusd_trades":
                     final OkCoinTradeResult okCoinTradeResult = mapper.treeToValue(dataNode, OkCoinTradeResult.class);
@@ -92,7 +84,8 @@ public class OkCoinStreamingPrivateDataService implements StreamingPrivateDataSe
                     System.out.println("Warning unknown response channel");
             }
         }
-        return accountInfo;
+
+        return new PrivateData(trades, accountInfo);
     }
 
     private AccountInfo adaptUserInfo(OkCoinUserInfoResult okCoinUserInfoResult) {
@@ -100,7 +93,7 @@ public class OkCoinStreamingPrivateDataService implements StreamingPrivateDataSe
         Map<String, Balance.Builder> builders = new TreeMap<String, Balance.Builder>();
 
         builders.put("btc", new Balance.Builder().currency(Currency.getInstance("btc")).available(free.getBtc()));
-        builders.put("usd", new Balance.Builder().currency(Currency.getInstance("usd")).available(free.getBtc()));
+        builders.put("usd", new Balance.Builder().currency(Currency.getInstance("usd")).available(free.getUsd()));
 
         List<Balance> wallet = new ArrayList<>(builders.size());
 

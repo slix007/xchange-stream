@@ -8,6 +8,8 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -195,6 +197,31 @@ public abstract class NettyStreamingService<T> {
         }).doOnDispose(() -> {
             sendMessage(getUnsubscribeMessage(channelName));
             channels.remove(channelName);
+        });
+    }
+
+    public Observable<T> subscribeBatchChannels(String externalChannelName,
+                                                List<String> internalChannelNames,
+                                                String... parameters) {
+        LOG.info("Subscribing to channel {}", Arrays.toString(new List[]{internalChannelNames}));
+
+        return Observable.<T>create(e -> {
+            if (webSocketChannel == null || !webSocketChannel.isOpen()) {
+                e.onError(new NotConnectedException());
+            }
+            for (String channelName : internalChannelNames) {
+                channels.put(channelName, e);
+            }
+            try {
+                sendMessage(getSubscribeMessage(externalChannelName, parameters));
+            } catch (IOException throwable) {
+                e.onError(throwable);
+            }
+        }).doOnDispose(() -> {
+            sendMessage(getUnsubscribeMessage(externalChannelName));
+            for (String channelName : internalChannelNames) {
+                channels.remove(channelName);
+            }
         });
     }
 

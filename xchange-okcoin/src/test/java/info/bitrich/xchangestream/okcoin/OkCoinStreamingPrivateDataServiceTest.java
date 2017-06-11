@@ -37,10 +37,12 @@ public class OkCoinStreamingPrivateDataServiceTest {
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode jsonNode = objectMapper.readTree(ClassLoader.getSystemClassLoader().getResourceAsStream("private-data.json"));
 
-        final PrivateData privateData = privateDataService.parseResult(jsonNode);
+        final PrivateData privateData = privateDataService.parseResult(jsonNode.get(0));
+        final PrivateData privateData1 = privateDataService.parseResult(jsonNode.get(1));
 
         assertEquals("577806943", privateData.getTrades().get(0).getId());
-        assertEquals("0.02807171", privateData.getAccountInfo().getWallet().getBalance(Currency.BTC).getAvailable().toPlainString());
+        assertEquals("0.02807171", privateData1.getAccountInfo().getWallet().getBalance(Currency.BTC).getAvailable().toPlainString());
+        assertEquals("363.4578", privateData1.getAccountInfo().getWallet().getBalance(Currency.USD).getAvailable().toPlainString());
     }
 
     @Test
@@ -50,7 +52,7 @@ public class OkCoinStreamingPrivateDataServiceTest {
         JsonNode jsonNode = objectMapper.readTree(ClassLoader.getSystemClassLoader()
                 .getResourceAsStream("private-data-trade-only.json"));
 
-        final PrivateData privateData = privateDataService.parseResult(jsonNode);
+        final PrivateData privateData = privateDataService.parseResult(jsonNode.get(0));
 
         assertNotNull(privateData.getTrades());
         assertEquals("577806943", privateData.getTrades().get(0).getId());
