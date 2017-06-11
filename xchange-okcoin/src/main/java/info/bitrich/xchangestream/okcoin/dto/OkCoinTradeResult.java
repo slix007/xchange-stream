@@ -23,7 +23,7 @@ public class OkCoinTradeResult {
     private BigDecimal tradeAmount;
     private BigDecimal tradePrice;
     private String tradeType;
-    private String tradeUnitPrice;
+    private BigDecimal tradeUnitPrice;
     private String unTrade;
 
     public OkCoinTradeResult(@JsonProperty("averagePrice") BigDecimal averagePrice,
@@ -37,7 +37,7 @@ public class OkCoinTradeResult {
                              @JsonProperty("tradeAmount") BigDecimal tradeAmount,
                              @JsonProperty("tradePrice") BigDecimal tradePrice,
                              @JsonProperty("tradeType") String tradeType,
-                             @JsonProperty("tradeUnitPrice") String tradeUnitPrice,
+                             @JsonProperty("tradeUnitPrice") BigDecimal tradeUnitPrice,
                              @JsonProperty("unTrade") String unTrade) {
         this.averagePrice = averagePrice;
         this.completedTradeAmount = completedTradeAmount;
@@ -142,11 +142,11 @@ public class OkCoinTradeResult {
         this.tradeType = tradeType;
     }
 
-    public String getTradeUnitPrice() {
+    public BigDecimal getTradeUnitPrice() {
         return tradeUnitPrice;
     }
 
-    public void setTradeUnitPrice(String tradeUnitPrice) {
+    public void setTradeUnitPrice(BigDecimal tradeUnitPrice) {
         this.tradeUnitPrice = tradeUnitPrice;
     }
 

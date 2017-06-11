@@ -110,7 +110,8 @@ public class OkCoinStreamingPrivateDataService implements StreamingPrivateDataSe
         final String orderId = String.valueOf(okCoinTradeResult.getOrderId());
         final Order.OrderStatus orderStatus = OkCoinAdapters.adaptOrderStatus(okCoinTradeResult.getStatus());
         return new LimitOrder(orderType, okCoinTradeResult.getTradeAmount(), currencyPair,
-                orderId, okCoinTradeResult.getCreatedDate(), okCoinTradeResult.getTradePrice(),
+                orderId, okCoinTradeResult.getCreatedDate(),
+                okCoinTradeResult.getTradeUnitPrice(),
                 okCoinTradeResult.getAveragePrice(),
                 okCoinTradeResult.getCompletedTradeAmount(),
                 orderStatus);

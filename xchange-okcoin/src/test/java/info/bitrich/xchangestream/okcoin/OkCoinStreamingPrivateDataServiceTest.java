@@ -9,11 +9,15 @@ import org.junit.Before;
 import org.junit.Test;
 import org.knowm.xchange.Exchange;
 import org.knowm.xchange.currency.Currency;
-import org.knowm.xchange.okcoin.dto.trade.OkCoinOrderResult;
+import org.knowm.xchange.dto.trade.LimitOrder;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import static org.junit.Assert.*;
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 /**
  * Created by Sergey Shurmin on 6/10/17.
@@ -54,8 +58,12 @@ public class OkCoinStreamingPrivateDataServiceTest {
 
         final PrivateData privateData = privateDataService.parseResult(jsonNode.get(0));
 
-        assertNotNull(privateData.getTrades());
-        assertEquals("577806943", privateData.getTrades().get(0).getId());
+        final List<LimitOrder> trades = privateData.getTrades();
+        assertNotNull(trades);
+        assertEquals("577806943", trades.get(0).getId());
+        assertEquals("2991.53", trades.get(0).getLimitPrice().toPlainString());
+        assertEquals("0.01", trades.get(0).getTradableAmount().toPlainString());
+        assertEquals("0.01", trades.get(0).getCumulativeAmount().toPlainString());
         assertNull(privateData.getAccountInfo());
     }
 
