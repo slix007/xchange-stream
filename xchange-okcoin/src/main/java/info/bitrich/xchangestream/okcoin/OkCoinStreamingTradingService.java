@@ -10,15 +10,12 @@ import info.bitrich.xchangestream.core.StreamingTradingService;
 
 import org.knowm.xchange.Exchange;
 import org.knowm.xchange.dto.trade.OpenOrders;
+import org.knowm.xchange.exceptions.NotAvailableFromExchangeException;
 import org.knowm.xchange.okcoin.OkCoinAdapters;
-import org.knowm.xchange.okcoin.dto.trade.OkCoinOrder;
 import org.knowm.xchange.okcoin.dto.trade.OkCoinOrderResult;
 
-import java.io.IOException;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import io.reactivex.Observable;
@@ -33,7 +30,12 @@ public class OkCoinStreamingTradingService implements StreamingTradingService {
     }
 
     @Override
-    public Observable<OpenOrders> getOpenOrdersObservable(Object... args) {
+    public Observable<OpenOrders> getOpenOrdersObservable() {
+        throw new NotAvailableFromExchangeException();
+    }
+
+    @Override
+    public Observable<OpenOrders> getOpenOrderObservable(Object... args) {
         final String apiKey = exchange.getExchangeSpecification().getApiKey();
         final String secretKey = exchange.getExchangeSpecification().getSecretKey();
         final String sign;
@@ -48,23 +50,10 @@ public class OkCoinStreamingTradingService implements StreamingTradingService {
 
         return service.subscribeChannel("ok_spotusd_orderinfo", apiKey, sign, symbol, orderId)
                 .map(jsonNode -> {
-                    System.out.println("ORDER: "
-                            + "id=" + jsonNode.get("data").get("orders").get(0).get("order_id")
-                            + "status=" + jsonNode.get("data").get("orders").get(0).get("status")
-                    );
                     final OkCoinOrderResult okCoinOrderResult = parseResult(jsonNode);
                     final OpenOrders openOrders = OkCoinAdapters.adaptOpenOrders(Collections.singletonList(okCoinOrderResult));
                     return openOrders;
                 });
-    }
-
-    List<OkCoinOrder> parseOrderList(JsonNode jsonNode) throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        mapper.registerModule(new JavaTimeModule());
-        final JsonNode dataNode = jsonNode.get("data").get("orders");
-        final String jsonAsString = dataNode.toString();
-        return Arrays.asList(mapper.readValue(jsonAsString, OkCoinOrder[].class));
     }
 
     OkCoinOrderResult parseResult(JsonNode jsonNode) throws JsonProcessingException {
@@ -75,6 +64,4 @@ public class OkCoinStreamingTradingService implements StreamingTradingService {
         final OkCoinOrderResult okCoinOrderResult = mapper.treeToValue(dataNode, OkCoinOrderResult.class);
         return okCoinOrderResult;
     }
-
-
 }

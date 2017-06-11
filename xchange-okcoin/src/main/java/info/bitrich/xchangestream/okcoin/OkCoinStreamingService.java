@@ -28,7 +28,16 @@ public class OkCoinStreamingService extends JsonNettyStreamingService {
     @Override
     public String getSubscribeMessage(String channelName, String... parameters) throws IOException {
         WebSocketMessageParameters webSocketMessageParameters = null;
-        if (parameters.length > 0) {
+        if (parameters.length == 2) {
+            try {
+                final String apiKey = parameters[0];
+                final String sign = parameters[1];
+                webSocketMessageParameters = new WebSocketMessageParameters(apiKey, sign, null, null);
+            } catch (Exception e) {
+                throw new IllegalArgumentException("Incorrect parameters " + Arrays.toString(parameters));
+            }
+        }
+        if (parameters.length == 4) {
             try {
                 final String apiKey = parameters[0];
                 final String sign = parameters[1];

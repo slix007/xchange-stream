@@ -6,12 +6,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.knowm.xchange.Exchange;
-import org.knowm.xchange.okcoin.dto.trade.OkCoinOrder;
 import org.knowm.xchange.okcoin.dto.trade.OkCoinOrderResult;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
-import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
@@ -30,19 +27,6 @@ public class OkCoinStreamingTradingServiceTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         tradingService = new OkCoinStreamingTradingService(okCoinStreamingService, exchange);
-    }
-
-    @Test
-    public void parseOrderList() throws Exception {
-        String inputData = "{\"data\":{\"result\":true,\"orders\":[{\"symbol\":\"btc_usd\",\"amount\":0.01,\"orders_id\":558911891,\"price\":2584.49,\"avg_price\":0,\"create_date\":1496507716000,\"type\":\"buy\",\"deal_amount\":0,\"order_id\":558911891,\"status\":0}]},\"channel\":\"ok_spotusd_orderinfo\"}";
-
-        ObjectMapper mapper = new ObjectMapper();
-        JsonNode jsonNode = mapper.readTree(inputData);
-
-        final List<OkCoinOrder> okCoinOrders = tradingService.parseOrderList(jsonNode);
-
-        assertEquals(558911891, okCoinOrders.get(0).getOrderId());
-        assertEquals("btc_usd", okCoinOrders.get(0).getSymbol());
     }
 
     @Test

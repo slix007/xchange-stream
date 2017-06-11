@@ -1,6 +1,5 @@
 package info.bitrich.xchangestream.core;
 
-import org.knowm.xchange.currency.CurrencyPair;
 import org.knowm.xchange.dto.trade.OpenOrders;
 
 import io.reactivex.Observable;
@@ -18,5 +17,15 @@ public interface StreamingTradingService {
      * @return {@link Observable} that emits {@link org.knowm.xchange.dto.trade.OpenOrders} when exchange sends the
      * update.
      */
-    Observable<OpenOrders> getOpenOrdersObservable(Object... args);
+    Observable<OpenOrders> getOpenOrdersObservable();
+
+    /**
+     * Get one order information.
+     *
+     * @param args additional parameters like orderId
+     * @return {@link Observable} that emits {@link org.knowm.xchange.dto.trade.OpenOrders} when exchange sends the
+     * update.
+     */
+    Observable<OpenOrders> getOpenOrderObservable(Object... args);
+
 }
