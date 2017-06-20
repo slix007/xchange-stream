@@ -28,6 +28,7 @@ import io.netty.handler.codec.http.HttpClientCodec;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
+import io.netty.handler.codec.http.websocketx.WebSocketClientHandshaker;
 import io.netty.handler.codec.http.websocketx.WebSocketClientHandshakerFactory;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketVersion;
@@ -52,6 +53,10 @@ public abstract class NettyStreamingService<T> {
         } catch (URISyntaxException e) {
             throw new IllegalArgumentException("Error parsing URI " + apiUrl, e);
         }
+    }
+
+    public Completable connect() {
+        return connect(1L, TimeUnit.MINUTES);
     }
 
     public Completable connect(long heartbeatInterval, TimeUnit heartbeatTimeUnit) {

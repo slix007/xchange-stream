@@ -1,10 +1,13 @@
 package info.bitrich.xchangestream.gdax;
 
+import info.bitrich.xchangestream.core.StreamingAccountService;
 import info.bitrich.xchangestream.core.StreamingExchange;
 import info.bitrich.xchangestream.core.StreamingMarketDataService;
+import info.bitrich.xchangestream.core.StreamingTradingService;
 import info.bitrich.xchangestream.service.netty.WebSocketClientHandler;
 import io.reactivex.Completable;
 import org.knowm.xchange.ExchangeSpecification;
+import org.knowm.xchange.exceptions.NotYetImplementedForExchangeException;
 import org.knowm.xchange.gdax.GDAXExchange;
 
 /**
@@ -56,4 +59,19 @@ public class GDAXStreamingExchange extends GDAXExchange implements StreamingExch
   public void setChannelInactiveHandler(WebSocketClientHandler.WebSocketMessageHandler channelInactiveHandler) {
     streamingService.setChannelInactiveHandler(channelInactiveHandler);
   }
+
+    @Override
+    public Completable onDisconnect() {
+        throw new NotYetImplementedForExchangeException();
+    }
+
+    @Override
+    public StreamingAccountService getStreamingAccountService() {
+        throw new NotYetImplementedForExchangeException();
+    }
+
+    @Override
+    public StreamingTradingService getStreamingTradingService() {
+        throw new NotYetImplementedForExchangeException();
+    }
 }
