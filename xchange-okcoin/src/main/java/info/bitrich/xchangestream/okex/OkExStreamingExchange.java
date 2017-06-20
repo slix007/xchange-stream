@@ -1,10 +1,11 @@
-package info.bitrich.xchangestream.okcoin;
+package info.bitrich.xchangestream.okex;
 
 import info.bitrich.xchangestream.core.StreamingAccountService;
 import info.bitrich.xchangestream.core.StreamingExchange;
 import info.bitrich.xchangestream.core.StreamingMarketDataService;
 import info.bitrich.xchangestream.core.StreamingPrivateDataService;
 import info.bitrich.xchangestream.core.StreamingTradingService;
+import info.bitrich.xchangestream.okcoin.OkCoinStreamingService;
 
 import org.knowm.xchange.exceptions.NotYetImplementedForExchangeException;
 import org.knowm.xchange.okcoin.OkCoinExchange;
@@ -19,24 +20,26 @@ import io.reactivex.Completable;
  *
  * To avoid disconnection we have to send keepalive heartbeats(ping).
  */
-public class OkCoinStreamingExchange extends OkCoinExchange implements StreamingExchange {
-    private static final String API_URI = "wss://real.okcoin.com:10440/websocket/okcoinapi";
+public class OkExStreamingExchange extends OkCoinExchange implements StreamingExchange {
+    private static final String API_URI_FEATURES = "wss://real.okex.com:10440/websocket/okcoinapi";
 
     private final OkCoinStreamingService streamingService;
-    private OkCoinStreamingMarketDataService streamingMarketDataService;
-    private OkCoinStreamingTradingService streamingTradingService;
-    private OkCoinStreamingPrivateDataService streamingPrivateDataService;
+    private OkExStreamingMarketDataService streamingMarketDataService;
+    private OkExStreamingTradingService streamingTradingService;
+    private OkExStreamingPrivateDataService streamingPrivateDataService;
 
-    public OkCoinStreamingExchange() {
-        streamingService = new OkCoinStreamingService(API_URI);
+    public OkExStreamingExchange() {
+        streamingService = new OkCoinStreamingService(API_URI_FEATURES);
     }
 
     @Override
     protected void initServices() {
         super.initServices();
-        streamingMarketDataService = new OkCoinStreamingMarketDataService(streamingService);
-        streamingTradingService = new OkCoinStreamingTradingService(streamingService, this);
-        streamingPrivateDataService = new OkCoinStreamingPrivateDataService(streamingService, this);
+        streamingMarketDataService = new OkExStreamingMarketDataService(streamingService);
+        streamingTradingService = new OkExStreamingTradingService(streamingService, this);
+
+        streamingPrivateDataService = new OkExStreamingPrivateDataService(streamingService, this);
+
     }
 
     @Override

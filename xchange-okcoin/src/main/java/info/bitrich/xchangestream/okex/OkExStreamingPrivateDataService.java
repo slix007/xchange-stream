@@ -1,4 +1,4 @@
-package info.bitrich.xchangestream.okcoin;
+package info.bitrich.xchangestream.okex;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -7,6 +7,8 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import info.bitrich.xchangestream.core.StreamingPrivateDataService;
 import info.bitrich.xchangestream.core.dto.PrivateData;
+import info.bitrich.xchangestream.okcoin.OkCoinAuthSigner;
+import info.bitrich.xchangestream.okcoin.OkCoinStreamingService;
 import info.bitrich.xchangestream.okcoin.dto.OkCoinTradeResult;
 import info.bitrich.xchangestream.okcoin.dto.OkCoinUserInfoResult;
 
@@ -29,14 +31,19 @@ import java.util.TreeMap;
 
 import io.reactivex.Observable;
 
-public class OkCoinStreamingPrivateDataService implements StreamingPrivateDataService {
+/**
+ * Created by Sergey Shurmin on 6/18/17.
+ */
+public class OkExStreamingPrivateDataService implements StreamingPrivateDataService {
+
     private final OkCoinStreamingService service;
     private final Exchange exchange;
 
-    OkCoinStreamingPrivateDataService(OkCoinStreamingService service, Exchange exchange) {
+    OkExStreamingPrivateDataService(OkCoinStreamingService service, Exchange exchange) {
         this.service = service;
         this.exchange = exchange;
     }
+
 
     @Override
     public Observable<PrivateData> getAllPrivateDataObservable() {
@@ -51,8 +58,10 @@ public class OkCoinStreamingPrivateDataService implements StreamingPrivateDataSe
         // or "channel": "ok_sub_spotusd_trades"
         // or "channel": "ok_sub_spotusd_userinfo",
         // Successful response for all: [{"data":{"result":"true"},"channel":"login"}]
-        return service.subscribeBatchChannels("ok_sub_spotusd_trades",
-                Arrays.asList("ok_sub_spotusd_trades", "ok_sub_spotusd_userinfo"),
+        return service.subscribeBatchChannels("ok_sub_futureusd_userinfo",
+                Arrays.asList("ok_sub_futureusd_userinfo",
+                        "ok_sub_futureusd_positions",
+                        "ok_sub_futureusd_trades"), //TODO check if it works
                 apiKey,
                 sign)
                 .map(this::parseResult);
@@ -70,15 +79,28 @@ public class OkCoinStreamingPrivateDataService implements StreamingPrivateDataSe
         final JsonNode channel = jsonNode.get("channel");
         if (channel != null) {
             final JsonNode dataNode = jsonNode.get("data");
+
+            System.out.println(channel.asText() + ":" + dataNode.toString());
+
             switch (channel.asText()) {
-                case "ok_sub_spotusd_trades":
-                    final OkCoinTradeResult okCoinTradeResult = mapper.treeToValue(dataNode, OkCoinTradeResult.class);
-                    final LimitOrder limitOrder = adaptTradeResult(okCoinTradeResult);
-                    trades.add(limitOrder);
+                case "ok_sub_futureusd_trades":
+                    // TODO parse future trades
+//                    final OkCoinTradeResult okCoinTradeResult = mapper.treeToValue(dataNode, OkCoinTradeResult.class);
+//                    final LimitOrder limitOrder = adaptTradeResult(okCoinTradeResult);
+//                    trades.add(limitOrder);
+                    System.out.println(dataNode);
                     break;
-                case "ok_sub_spotusd_userinfo":
-                    final OkCoinUserInfoResult okCoinUserInfoResult = mapper.treeToValue(dataNode, OkCoinUserInfoResult.class);
-                    accountInfo = adaptUserInfo(okCoinUserInfoResult);
+                case "ok_sub_futureusd_userinfo":
+                    // TODO parse user info
+//                    final OkCoinUserInfoResult okCoinUserInfoResult = mapper.treeToValue(dataNode, OkCoinUserInfoResult.class);
+//                    accountInfo = adaptUserInfo(okCoinUserInfoResult);
+                    System.out.println(dataNode);
+                    break;
+                case "ok_sub_futureusd_positions":
+                    // TODO parse position
+//                    final OkCoinUserInfoResult okCoinUserInfoResult = mapper.treeToValue(dataNode, OkCoinUserInfoResult.class);
+//                    accountInfo = adaptUserInfo(okCoinUserInfoResult);
+                    System.out.println(dataNode);
                     break;
                 default:
                     System.out.println("Warning unknown response channel");

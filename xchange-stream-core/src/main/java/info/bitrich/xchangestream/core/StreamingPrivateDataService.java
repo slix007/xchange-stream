@@ -12,5 +12,5 @@ public interface StreamingPrivateDataService {
     /**
      * Emits private data on subscription.
      */
-    Observable<PrivateData> getTradesAndBalances();
+    Observable<PrivateData> getAllPrivateDataObservable();
 }
