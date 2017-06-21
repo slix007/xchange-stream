@@ -24,9 +24,11 @@ public class OkExStreamingExchange extends OkCoinExchange implements StreamingEx
     private static final String API_URI_FEATURES = "wss://real.okex.com:10440/websocket/okcoinapi";
 
     private final OkCoinStreamingService streamingService;
+
     private OkExStreamingMarketDataService streamingMarketDataService;
     private OkExStreamingTradingService streamingTradingService;
     private OkExStreamingPrivateDataService streamingPrivateDataService;
+    private OkExStreamingAccountInfoService streamingAccountInfoService;
 
     public OkExStreamingExchange() {
         streamingService = new OkCoinStreamingService(API_URI_FEATURES);
@@ -39,6 +41,7 @@ public class OkExStreamingExchange extends OkCoinExchange implements StreamingEx
         streamingTradingService = new OkExStreamingTradingService(streamingService, this);
 
         streamingPrivateDataService = new OkExStreamingPrivateDataService(streamingService, this);
+        streamingAccountInfoService = new OkExStreamingAccountInfoService(streamingService, this);
 
     }
 
@@ -74,5 +77,9 @@ public class OkExStreamingExchange extends OkCoinExchange implements StreamingEx
 
     public StreamingPrivateDataService getStreamingPrivateDataService() {
         return streamingPrivateDataService;
+    }
+
+    public OkExStreamingAccountInfoService getStreamingAccountInfoService() {
+        return streamingAccountInfoService;
     }
 }

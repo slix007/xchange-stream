@@ -44,7 +44,6 @@ public class OkExStreamingPrivateDataService implements StreamingPrivateDataServ
         this.exchange = exchange;
     }
 
-
     @Override
     public Observable<PrivateData> getAllPrivateDataObservable() {
         final String apiKey = exchange.getExchangeSpecification().getApiKey();

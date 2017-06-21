@@ -1,7 +1,13 @@
 package info.bitrich.xchangestream.okex;
 
+import info.bitrich.xchangestream.okex.dto.OkExUserInfoResult;
+
+import org.knowm.xchange.currency.Currency;
 import org.knowm.xchange.currency.CurrencyPair;
 import org.knowm.xchange.dto.Order;
+import org.knowm.xchange.dto.account.AccountInfo;
+import org.knowm.xchange.dto.account.Balance;
+import org.knowm.xchange.dto.account.Wallet;
 import org.knowm.xchange.dto.marketdata.OrderBook;
 import org.knowm.xchange.dto.trade.LimitOrder;
 import org.knowm.xchange.okcoin.dto.marketdata.OkCoinDepth;
@@ -11,11 +17,51 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * Created by Sergey Shurmin on 6/20/17.
  */
 public class OkExAdapters {
+
+    /**
+     * getTotal == Wallet Balance
+     * getAvailable == Available Balance
+     */
+    public final static Currency WALLET_CURRENCY = new Currency("WALLET");
+    /**
+     * getTotal == Margin Balance
+     * getAvailable == Margin Balance
+     */
+    public final static Currency MARGIN_CURRENCY = new Currency("MARGIN");
+    /**
+     * getTotal == Size(contract)
+     * getAvailable == Value(XBT)
+     */
+    public final static Currency POSITION_CURRENCY = new Currency("POSITION");
+
+    public static AccountInfo adaptUserInfo(OkExUserInfoResult okExUserInfoResult) {
+        final OkExUserInfoResult.BalanceInfo btcInfo = okExUserInfoResult.getBtcInfo();
+        Map<String, Balance.Builder> builders = new TreeMap<>();
+
+        builders.put("btc", new Balance.Builder().currency(WALLET_CURRENCY)
+                .total(btcInfo.getAccountRights())
+                .available(btcInfo.getAccountRights())
+                .depositing(btcInfo.getKeepDeposit())
+                .loaned(btcInfo.getProfitReal())
+                .borrowed(btcInfo.getProfitUnreal())
+                .frozen(btcInfo.getRiskRate())
+        );
+
+        List<Balance> wallet = new ArrayList<>(builders.size());
+
+        for (Balance.Builder builder : builders.values()) {
+            wallet.add(builder.build());
+        }
+
+        return new AccountInfo(new Wallet(wallet));
+    }
 
     public static OrderBook adaptOrderBook(OkCoinDepth depth, CurrencyPair currencyPair) {
 

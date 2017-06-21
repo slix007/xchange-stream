@@ -26,6 +26,8 @@ import org.knowm.xchange.exceptions.NotAvailableFromExchangeException;
 import org.knowm.xchange.exceptions.NotYetImplementedForExchangeException;
 import org.knowm.xchange.okcoin.OkCoinAdapters;
 import org.knowm.xchange.okcoin.dto.trade.OkCoinOrderResult;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -38,6 +40,8 @@ import java.util.concurrent.TimeUnit;
 import io.reactivex.Observable;
 
 public class OkExStreamingTradingService implements StreamingTradingService {
+    private static final Logger logger = LoggerFactory.getLogger(OkExStreamingTradingService.class);
+
     private final OkCoinStreamingService service;
     private final Exchange exchange;
 
@@ -71,6 +75,7 @@ public class OkExStreamingTradingService implements StreamingTradingService {
             throw new ExchangeException(e.getMessage());
         }
 
+        logger.info(subscribeMessage);
         // send the message and wait for an answer
         List<String> orderList = new ArrayList<>();
         StringBuilder errorSb = new StringBuilder();
@@ -80,13 +85,13 @@ public class OkExStreamingTradingService implements StreamingTradingService {
                     final JsonNode dataNode = jsonNode.get("data");
                     final boolean result = dataNode.get("result").asBoolean();
                     if (!result) {
-                        errorSb.append(jsonNode.get("errorcode"));
+                        errorSb.append(jsonNode.get("error_code"));
                         throw new ExchangeException(errorSb.toString());
                     }
                     final String orderIdString = dataNode.get("order_id").asText();
                     return orderIdString;
                 })
-                .timeout(500, TimeUnit.MILLISECONDS)
+                .timeout(1000, TimeUnit.MILLISECONDS)
                 .take(1)
                 .blockingSubscribe(orderList::add,
                         throwable -> errorSb.append(throwable.toString())
