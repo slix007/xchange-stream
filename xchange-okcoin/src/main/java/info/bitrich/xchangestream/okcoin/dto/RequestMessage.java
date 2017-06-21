@@ -4,14 +4,14 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class WebSocketMessage {
+public class RequestMessage {
     private final String event;
     private final String channel;
-    private final WebSocketMessageParameters parameters;
+    private final RequestParameters parameters;
 
-    public WebSocketMessage(@JsonProperty("event") String event,
-                            @JsonProperty("channel") String channel,
-                            @JsonProperty("parameters") WebSocketMessageParameters parameters) {
+    public RequestMessage(@JsonProperty("event") String event,
+                          @JsonProperty("channel") String channel,
+                          @JsonProperty("parameters") RequestParameters parameters) {
         this.event = event;
         this.channel = channel;
         this.parameters = parameters;
@@ -26,7 +26,7 @@ public class WebSocketMessage {
     }
 
     @JsonProperty("parameters")
-    public WebSocketMessageParameters getParameters() {
+    public RequestParameters getParameters() {
         return parameters;
     }
 }

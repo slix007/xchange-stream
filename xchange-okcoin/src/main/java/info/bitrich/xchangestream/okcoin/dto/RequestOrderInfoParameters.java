@@ -9,7 +9,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({"apiKey", "sign", "symbol", "orderId"})
-public class WebSocketMessageParameters {
+public class RequestOrderInfoParameters implements RequestParameters {
 
     @JsonProperty("api_key")
     private final String apiKey;
@@ -20,7 +20,7 @@ public class WebSocketMessageParameters {
     @JsonProperty("order_id")
     private final String orderId;
 
-    public WebSocketMessageParameters(@JsonProperty("api_key") String apiKey,
+    public RequestOrderInfoParameters(@JsonProperty("api_key") String apiKey,
                                       @JsonProperty("sign") String sign,
                                       @JsonProperty("symbol") String symbol,
                                       @JsonProperty("order_id") String orderId) {

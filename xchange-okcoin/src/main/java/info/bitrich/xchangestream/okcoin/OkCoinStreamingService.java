@@ -2,11 +2,12 @@ package info.bitrich.xchangestream.okcoin;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import info.bitrich.xchangestream.okcoin.dto.WebSocketMessage;
-import info.bitrich.xchangestream.okcoin.dto.WebSocketMessageParameters;
+import info.bitrich.xchangestream.okcoin.dto.RequestMessage;
+import info.bitrich.xchangestream.okcoin.dto.RequestOrderInfoParameters;
 import info.bitrich.xchangestream.service.netty.JsonNettyStreamingService;
 
 import org.knowm.xchange.exceptions.ExchangeException;
@@ -26,13 +27,13 @@ public class OkCoinStreamingService extends JsonNettyStreamingService {
     }
 
     @Override
-    public String getSubscribeMessage(String channelName, String... parameters) throws IOException {
-        WebSocketMessageParameters webSocketMessageParameters = null;
+    public String getSubscribeMessage(String channelName, String... parameters) throws JsonProcessingException {
+        RequestOrderInfoParameters requestOrderInfoParameters = null;
         if (parameters.length == 2) {
             try {
                 final String apiKey = parameters[0];
                 final String sign = parameters[1];
-                webSocketMessageParameters = new WebSocketMessageParameters(apiKey, sign, null, null);
+                requestOrderInfoParameters = new RequestOrderInfoParameters(apiKey, sign, null, null);
             } catch (Exception e) {
                 throw new IllegalArgumentException("Incorrect parameters " + Arrays.toString(parameters));
             }
@@ -43,26 +44,26 @@ public class OkCoinStreamingService extends JsonNettyStreamingService {
                 final String sign = parameters[1];
                 final String symbol = parameters[2];
                 final String orderId = parameters[3];
-                webSocketMessageParameters = new WebSocketMessageParameters(apiKey, sign, symbol, orderId);
+                requestOrderInfoParameters = new RequestOrderInfoParameters(apiKey, sign, symbol, orderId);
             } catch (Exception e) {
                 throw new IllegalArgumentException("Incorrect parameters " + Arrays.toString(parameters));
             }
         }
 
-        WebSocketMessage webSocketMessage = new WebSocketMessage("addChannel", channelName, webSocketMessageParameters);
+        RequestMessage requestMessage = new RequestMessage("addChannel", channelName, requestOrderInfoParameters);
 
         ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.registerSubtypes(WebSocketMessageParameters.class);
+        objectMapper.registerSubtypes(RequestOrderInfoParameters.class);
         objectMapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
-        return objectMapper.writeValueAsString(webSocketMessage);
+        return objectMapper.writeValueAsString(requestMessage);
     }
 
     @Override
     public String getUnsubscribeMessage(String channelName) throws IOException {
-        WebSocketMessage webSocketMessage = new WebSocketMessage("removeChannel", channelName, null);
+        RequestMessage requestMessage = new RequestMessage("removeChannel", channelName, null);
 
         ObjectMapper objectMapper = new ObjectMapper();
-        return objectMapper.writeValueAsString(webSocketMessage);
+        return objectMapper.writeValueAsString(requestMessage);
     }
 
     @Override

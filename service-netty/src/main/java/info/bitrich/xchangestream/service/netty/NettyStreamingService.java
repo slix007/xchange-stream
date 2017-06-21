@@ -205,6 +205,24 @@ public abstract class NettyStreamingService<T> {
         });
     }
 
+    public Observable<T> sendAndSubscribe(String message, String channelName) {
+        LOG.info("Subscribing to channel {}", channelName);
+
+        return Observable.<T>create(e -> {
+            if (webSocketChannel == null || !webSocketChannel.isOpen()) {
+                e.onError(new NotConnectedException());
+            }
+
+            channels.put(channelName, e);
+
+            sendMessage(message);
+
+        }).doOnDispose(() -> {
+            sendMessage(getUnsubscribeMessage(channelName));
+            channels.remove(channelName);
+        });
+    }
+
     public Observable<T> subscribeBatchChannels(String externalChannelName,
                                                 List<String> internalChannelNames,
                                                 String... parameters) {
