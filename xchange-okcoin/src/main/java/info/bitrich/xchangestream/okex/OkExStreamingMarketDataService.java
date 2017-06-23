@@ -65,7 +65,7 @@ public class OkExStreamingMarketDataService implements StreamingMarketDataServic
     }
 
     public Observable<OrderBook> getOrderBook(CurrencyPair currencyPair, Tool tool, FuturesContract futuresContract, Depth depth) {
-        String channel = String.format("ok_sub_future_%s_depth_%s_%s", tool, futuresContract, depth);
+        String channel = String.format("ok_sub_future_%s_depth_%s_%s", tool.getName(), futuresContract.getName(), depth.getName());
         return service.subscribeChannel(channel)
                 .map(s -> {
                     ObjectMapper mapper = new ObjectMapper();
