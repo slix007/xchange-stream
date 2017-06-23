@@ -5,13 +5,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import info.bitrich.xchangestream.okcoin.OkCoinStreamingService;
 import info.bitrich.xchangestream.okex.dto.ContractOrderType;
-import info.bitrich.xchangestream.okex.dto.ContractType;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.knowm.xchange.Exchange;
 import org.knowm.xchange.ExchangeSpecification;
+import org.knowm.xchange.okcoin.FuturesContract;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -50,7 +50,7 @@ public class OkExStreamingTradingServiceTest {
         final ExchangeSpecification exchangeSpecification = new ExchangeSpecification(OkExStreamingExchange.class);
         when(exchange.getExchangeSpecification()).thenReturn(exchangeSpecification);
 
-        final String orderId = tradingService.placeContractOrder("btc_usd", ContractType.THIS_WEEK,
+        final String orderId = tradingService.placeContractOrder("btc_usd", FuturesContract.ThisWeek,
                 new BigDecimal("2991.53"), new BigDecimal("0.01"),
                 ContractOrderType.OPEN_LONG_POSITION_BUY);
 

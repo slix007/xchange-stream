@@ -14,8 +14,6 @@ import info.bitrich.xchangestream.okcoin.OkCoinStreamingService;
 import info.bitrich.xchangestream.okcoin.dto.RequestMessage;
 import info.bitrich.xchangestream.okcoin.dto.RequestOrderInfoParameters;
 import info.bitrich.xchangestream.okex.dto.ContractOrderType;
-import info.bitrich.xchangestream.okex.dto.ContractType;
-
 import info.bitrich.xchangestream.okex.dto.RequestPlaceOrderParameters;
 
 import org.knowm.xchange.Exchange;
@@ -24,6 +22,7 @@ import org.knowm.xchange.dto.trade.OpenOrders;
 import org.knowm.xchange.exceptions.ExchangeException;
 import org.knowm.xchange.exceptions.NotAvailableFromExchangeException;
 import org.knowm.xchange.exceptions.NotYetImplementedForExchangeException;
+import org.knowm.xchange.okcoin.FuturesContract;
 import org.knowm.xchange.okcoin.OkCoinAdapters;
 import org.knowm.xchange.okcoin.dto.trade.OkCoinOrderResult;
 import org.slf4j.Logger;
@@ -60,7 +59,7 @@ public class OkExStreamingTradingService implements StreamingTradingService {
         throw new NotYetImplementedForExchangeException("Use getOrderInfo");
     }
 
-    public String placeContractOrder(String symbol, ContractType contractType,
+    public String placeContractOrder(String symbol, FuturesContract contractType,
                                      BigDecimal price,
                                      BigDecimal amount,
                                      ContractOrderType type) {
@@ -91,7 +90,7 @@ public class OkExStreamingTradingService implements StreamingTradingService {
                     final String orderIdString = dataNode.get("order_id").asText();
                     return orderIdString;
                 })
-                .timeout(1000, TimeUnit.MILLISECONDS)
+                .timeout(2000, TimeUnit.MILLISECONDS)
                 .take(1)
                 .blockingSubscribe(orderList::add,
                         throwable -> errorSb.append(throwable.toString())
@@ -103,7 +102,7 @@ public class OkExStreamingTradingService implements StreamingTradingService {
         return orderList.get(0);
     }
 
-    private String composePlaceOrderRequest(String symbol, ContractType contractType, BigDecimal price, BigDecimal amount, ContractOrderType type, String channelName) throws JsonProcessingException {
+    private String composePlaceOrderRequest(String symbol, FuturesContract contractType, BigDecimal price, BigDecimal amount, ContractOrderType type, String channelName) throws JsonProcessingException {
         String subscribeMessage;
         final String apiKey = exchange.getExchangeSpecification().getApiKey();
         final String secretKey = exchange.getExchangeSpecification().getSecretKey();
@@ -111,7 +110,7 @@ public class OkExStreamingTradingService implements StreamingTradingService {
         final OkCoinAuthSigner signer = new OkCoinAuthSigner(apiKey, secretKey);
         final Map<String, String> nameValueMap = new HashMap<>();
         nameValueMap.put("symbol", symbol);
-        nameValueMap.put("contract_type", contractType.getValue());
+        nameValueMap.put("contract_type", contractType.getName());
         nameValueMap.put("price", price.toPlainString());
         nameValueMap.put("amount", amount.toPlainString());
         nameValueMap.put("type", type.getValue());
@@ -122,7 +121,7 @@ public class OkExStreamingTradingService implements StreamingTradingService {
         final RequestPlaceOrderParameters requestPlaceOrderParameters = new RequestPlaceOrderParameters(apiKey,
                 sign,
                 symbol,
-                contractType.getValue(),
+                contractType.getName(),
                 price.toPlainString(),
                 amount.toPlainString(),
                 type.getValue(),

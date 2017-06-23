@@ -9,25 +9,22 @@ import info.bitrich.xchangestream.core.StreamingPrivateDataService;
 import info.bitrich.xchangestream.core.dto.PrivateData;
 import info.bitrich.xchangestream.okcoin.OkCoinAuthSigner;
 import info.bitrich.xchangestream.okcoin.OkCoinStreamingService;
-import info.bitrich.xchangestream.okcoin.dto.OkCoinTradeResult;
-import info.bitrich.xchangestream.okcoin.dto.OkCoinUserInfoResult;
+import info.bitrich.xchangestream.okex.dto.BalanceEx;
+import info.bitrich.xchangestream.okex.dto.OkExTradeResult;
 
 import org.knowm.xchange.Exchange;
-import org.knowm.xchange.currency.Currency;
-import org.knowm.xchange.currency.CurrencyPair;
-import org.knowm.xchange.dto.Order;
 import org.knowm.xchange.dto.account.AccountInfo;
-import org.knowm.xchange.dto.account.Balance;
 import org.knowm.xchange.dto.account.Wallet;
 import org.knowm.xchange.dto.trade.LimitOrder;
-import org.knowm.xchange.okcoin.OkCoinAdapters;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 
 import io.reactivex.Observable;
 
@@ -35,6 +32,7 @@ import io.reactivex.Observable;
  * Created by Sergey Shurmin on 6/18/17.
  */
 public class OkExStreamingPrivateDataService implements StreamingPrivateDataService {
+    private static final Logger logger = LoggerFactory.getLogger(OkExStreamingPrivateDataService.class);
 
     private final OkCoinStreamingService service;
     private final Exchange exchange;
@@ -53,14 +51,11 @@ public class OkExStreamingPrivateDataService implements StreamingPrivateDataServ
         final String sign = signer.digestParams(nameValueMap);
 
         // The same info for all subscriptions:
-        // {"event":"login","parameters":{"api_key":"xxx","sign":"xxx"}}
-        // or "channel": "ok_sub_spotusd_trades"
-        // or "channel": "ok_sub_spotusd_userinfo",
         // Successful response for all: [{"data":{"result":"true"},"channel":"login"}]
         return service.subscribeBatchChannels("ok_sub_futureusd_userinfo",
                 Arrays.asList("ok_sub_futureusd_userinfo",
                         "ok_sub_futureusd_positions",
-                        "ok_sub_futureusd_trades"), //TODO check if it works
+                        "ok_sub_futureusd_trades"),
                 apiKey,
                 sign)
                 .map(this::parseResult);
@@ -84,22 +79,27 @@ public class OkExStreamingPrivateDataService implements StreamingPrivateDataServ
             switch (channel.asText()) {
                 case "ok_sub_futureusd_trades":
                     // TODO parse future trades
-//                    final OkCoinTradeResult okCoinTradeResult = mapper.treeToValue(dataNode, OkCoinTradeResult.class);
-//                    final LimitOrder limitOrder = adaptTradeResult(okCoinTradeResult);
-//                    trades.add(limitOrder);
-                    System.out.println(dataNode);
+                    final OkExTradeResult okExTradeResult = mapper.treeToValue(dataNode, OkExTradeResult.class);
+                    final LimitOrder limitOrder = OkExAdapters.adaptTradeResult(okExTradeResult);
+                    trades.add(limitOrder);
                     break;
                 case "ok_sub_futureusd_userinfo":
                     // TODO parse user info
-//                    final OkCoinUserInfoResult okCoinUserInfoResult = mapper.treeToValue(dataNode, OkCoinUserInfoResult.class);
-//                    accountInfo = adaptUserInfo(okCoinUserInfoResult);
-                    System.out.println(dataNode);
+                    final BigDecimal total = new BigDecimal(dataNode.get("balance").asText());
+                    final BigDecimal amountStr = new BigDecimal(dataNode.get("unit_amount").asText());
+                    final BigDecimal profitReal = new BigDecimal(dataNode.get("profit_real").asText());
+                    final BigDecimal equity = new BigDecimal(dataNode.get("keep_deposit").asText());
+                    final BigDecimal available = total.subtract(equity);
+                    final BalanceEx balance = new BalanceEx(OkExAdapters.WALLET_CURRENCY,
+                            total,
+                            available,
+                            equity);
+                    balance.setRaw(dataNode.toString());
+                    accountInfo = new AccountInfo(new Wallet(balance));
                     break;
                 case "ok_sub_futureusd_positions":
-                    // TODO parse position
-//                    final OkCoinUserInfoResult okCoinUserInfoResult = mapper.treeToValue(dataNode, OkCoinUserInfoResult.class);
-//                    accountInfo = adaptUserInfo(okCoinUserInfoResult);
-                    System.out.println(dataNode);
+                    final JsonNode positionsNode = dataNode.get("positions");
+                    accountInfo = adaptPosition(positionsNode);
                     break;
                 default:
                     System.out.println("Warning unknown response channel");
@@ -109,33 +109,33 @@ public class OkExStreamingPrivateDataService implements StreamingPrivateDataServ
         return new PrivateData(trades, accountInfo);
     }
 
-    private AccountInfo adaptUserInfo(OkCoinUserInfoResult okCoinUserInfoResult) {
-        final OkCoinUserInfoResult.Free free = okCoinUserInfoResult.getInfo().getFree();
-        Map<String, Balance.Builder> builders = new TreeMap<>();
+    private AccountInfo adaptPosition(JsonNode positionsNode) {
+        logger.info(positionsNode.toString());
+        BalanceEx balance1 = BalanceEx.zero(OkExAdapters.POSITION_LONG_CURRENCY);
+        BalanceEx balance2 = BalanceEx.zero(OkExAdapters.POSITION_SHORT_CURRENCY);
+        for (JsonNode node : positionsNode) {
 
-        builders.put("btc", new Balance.Builder().currency(Currency.getInstance("btc")).available(free.getBtc()));
-        builders.put("usd", new Balance.Builder().currency(Currency.getInstance("usd")).available(free.getUsd()));
-
-        List<Balance> wallet = new ArrayList<>(builders.size());
-
-        for (Balance.Builder builder : builders.values()) {
-            wallet.add(builder.build());
+            final String contractName = node.get("contract_name").asText();
+            final String bondfreez = node.get("bondfreez").asText();
+            final String position = node.get("position").asText();
+            if (position.equals("1")) { // long - buy - bid
+                balance1 = new BalanceEx(OkExAdapters.POSITION_LONG_CURRENCY,
+                        BigDecimal.ZERO,
+                        BigDecimal.ZERO,
+                        new BigDecimal(bondfreez)
+                );
+                balance1.setRaw(positionsNode.toString());
+            } else if (position.equals("2")) { // short - sell - ask
+                balance2 = new BalanceEx(OkExAdapters.POSITION_SHORT_CURRENCY,
+                        BigDecimal.ZERO,
+                        BigDecimal.ZERO,
+                        new BigDecimal(bondfreez)
+                );
+                balance2.setRaw(positionsNode.toString());
+            }
         }
 
-        return new AccountInfo(new Wallet(wallet));
-    }
-
-    private LimitOrder adaptTradeResult(OkCoinTradeResult okCoinTradeResult) {
-        final Order.OrderType orderType = OkCoinAdapters.adaptOrderType(okCoinTradeResult.getTradeType());
-        final CurrencyPair currencyPair = OkCoinAdapters.adaptSymbol(okCoinTradeResult.getSymbol());
-        final String orderId = String.valueOf(okCoinTradeResult.getOrderId());
-        final Order.OrderStatus orderStatus = OkCoinAdapters.adaptOrderStatus(okCoinTradeResult.getStatus());
-        return new LimitOrder(orderType, okCoinTradeResult.getTradeAmount(), currencyPair,
-                orderId, okCoinTradeResult.getCreatedDate(),
-                okCoinTradeResult.getTradeUnitPrice(),
-                okCoinTradeResult.getAveragePrice(),
-                okCoinTradeResult.getCompletedTradeAmount(),
-                orderStatus);
+        return new AccountInfo(new Wallet(balance1, balance2));
     }
 
 }

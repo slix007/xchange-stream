@@ -53,7 +53,7 @@ public class OkExStreamingAccountInfoService {
 
         service.subscribeChannel("ok_futureusd_userinfo", apiKey, sign)
                 .take(1)
-                .timeout(1000, TimeUnit.MILLISECONDS)
+                .timeout(2000, TimeUnit.MILLISECONDS)
                 .blockingSubscribe(jsonNode -> {
                             final JsonNode dataNode = jsonNode.get("data");
                             if (!dataNode.get("result").asBoolean()) {
@@ -62,7 +62,7 @@ public class OkExStreamingAccountInfoService {
                             final JsonNode infoNode = dataNode.get("info");
                             final OkExUserInfoResult infoResult = mapper.treeToValue(infoNode, OkExUserInfoResult.class);
 
-                            accountInfo.add(OkExAdapters.adaptUserInfo(infoResult));
+                            accountInfo.add(OkExAdapters.adaptUserInfo(infoResult, infoNode.toString()));
                         },
                         throwable -> {
                             throw new ExchangeException(throwable.getMessage());
