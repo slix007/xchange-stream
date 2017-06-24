@@ -88,25 +88,23 @@ public class OkExAdapters {
 
     private static LimitOrder adaptLimitOrder(Order.OrderType type, BigDecimal[] data, CurrencyPair currencyPair, String id, Date timestamp) {
         // [Price, Amount(Contract), Amount(Coin),Cumulant(Coin),Cumulant(Contract)]
-        final ContractLimitOrder contractLimitOrder = new ContractLimitOrder(type, data[2], currencyPair, id, timestamp, data[0]);
-        contractLimitOrder.setContractPrice(data[1]);
+        final ContractLimitOrder contractLimitOrder = new ContractLimitOrder(type, data[1], currencyPair, id, timestamp, data[0]);
+        contractLimitOrder.setAmountInBaseCurrency(data[2]);
         return contractLimitOrder;
     }
 
 
     public static LimitOrder adaptTradeResult(OkExTradeResult okExTradeResult) {
         final Order.OrderType orderType = OkExAdapters.adaptOrderType(okExTradeResult.getType());
-        final CurrencyPair currencyPair = new CurrencyPair(new Currency("BTC"), new Currency("MRG"));
+        final CurrencyPair currencyPair = CurrencyPair.BTC_USD; //TODO remove hardcode somehow
         final String orderId = String.valueOf(okExTradeResult.getOrderId());
         final Order.OrderStatus orderStatus = OkCoinAdapters.adaptOrderStatus(okExTradeResult.getStatus());
-        final ContractLimitOrder contractLimitOrder = new ContractLimitOrder(orderType, okExTradeResult.getAmount(), currencyPair,
+        return new ContractLimitOrder(orderType, okExTradeResult.getAmount(), currencyPair,
                 orderId, okExTradeResult.getCreateDate(),
                 okExTradeResult.getPrice(),
                 okExTradeResult.getPriceAvg(),
                 okExTradeResult.getDealAmount(),
                 orderStatus);
-        contractLimitOrder.setContractPrice(new BigDecimal(okExTradeResult.getUnitAmount()));
-        return contractLimitOrder;
     }
 
     private static Order.OrderType adaptOrderType(Integer type) {
