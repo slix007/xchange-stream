@@ -115,20 +115,21 @@ public class OkExStreamingPrivateDataService implements StreamingPrivateDataServ
         BalanceEx balance2 = BalanceEx.zero(OkExAdapters.POSITION_SHORT_CURRENCY);
         for (JsonNode node : positionsNode) {
 
-            final String contractName = node.get("contract_name").asText();
+            final String contractAmount = node.get("hold_amount").asText();
+            final String available = node.get("eveningup").asText();
             final String bondfreez = node.get("bondfreez").asText();
             final String position = node.get("position").asText();
             if (position.equals("1")) { // long - buy - bid
                 balance1 = new BalanceEx(OkExAdapters.POSITION_LONG_CURRENCY,
-                        BigDecimal.ZERO,
-                        BigDecimal.ZERO,
+                        new BigDecimal(contractAmount),
+                        new BigDecimal(available),
                         new BigDecimal(bondfreez)
                 );
                 balance1.setRaw(positionsNode.toString());
             } else if (position.equals("2")) { // short - sell - ask
                 balance2 = new BalanceEx(OkExAdapters.POSITION_SHORT_CURRENCY,
-                        BigDecimal.ZERO,
-                        BigDecimal.ZERO,
+                        new BigDecimal(contractAmount),
+                        new BigDecimal(available),
                         new BigDecimal(bondfreez)
                 );
                 balance2.setRaw(positionsNode.toString());

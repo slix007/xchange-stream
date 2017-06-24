@@ -116,6 +116,12 @@ public class OkExAdapters {
         } else if (type.equals(2)) {
             //short - sell - ask
             return Order.OrderType.ASK;
+        } else if (type.equals(3)) {
+            //short - sell - ask
+            return Order.OrderType.EXIT_BID;
+        } else if (type.equals(4)) {
+            //short - sell - ask
+            return Order.OrderType.EXIT_ASK;
         }
         return null;
     }
