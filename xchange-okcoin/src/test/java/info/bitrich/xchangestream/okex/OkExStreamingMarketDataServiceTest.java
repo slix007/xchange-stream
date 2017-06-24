@@ -51,23 +51,23 @@ public class OkExStreamingMarketDataServiceTest {
 
         List<LimitOrder> bids = new ArrayList<>();
         final Date date = new Date(1497987207553L);
-        final ContractLimitOrder b1 = new ContractLimitOrder(Order.OrderType.BID, new BigDecimal("0.6591"), CurrencyPair.BTC_USD, null, date, new BigDecimal("2882.49"));
-        b1.setContractPrice(BigDecimal.valueOf(19));
-        final ContractLimitOrder b2 = new ContractLimitOrder(Order.OrderType.BID, new BigDecimal("1.7346"), CurrencyPair.BTC_USD, null, date, new BigDecimal("2882.48"));
-        b2.setContractPrice(BigDecimal.valueOf(50));
-        final ContractLimitOrder b3 = new ContractLimitOrder(Order.OrderType.BID, new BigDecimal("0.451"), CurrencyPair.BTC_USD, null, date, new BigDecimal("2882.46"));
-        b3.setContractPrice(BigDecimal.valueOf(13));
+        final ContractLimitOrder b1 = new ContractLimitOrder(Order.OrderType.BID, BigDecimal.valueOf(19), CurrencyPair.BTC_USD, null, date, new BigDecimal("2882.49"));
+        b1.setAmountInBaseCurrency(new BigDecimal("0.6591"));
+        final ContractLimitOrder b2 = new ContractLimitOrder(Order.OrderType.BID, BigDecimal.valueOf(50), CurrencyPair.BTC_USD, null, date, new BigDecimal("2882.48"));
+        b2.setAmountInBaseCurrency(new BigDecimal("1.7346"));
+        final ContractLimitOrder b3 = new ContractLimitOrder(Order.OrderType.BID, BigDecimal.valueOf(13), CurrencyPair.BTC_USD, null, date, new BigDecimal("2882.46"));
+        b3.setAmountInBaseCurrency(new BigDecimal("0.451"));
         bids.add(b1);
         bids.add(b2);
         bids.add(b3);
 
         List<LimitOrder> asks = new ArrayList<>();
-        final ContractLimitOrder a1 = new ContractLimitOrder(Order.OrderType.ASK, new BigDecimal("1.3762"), CurrencyPair.BTC_USD, null, date, new BigDecimal("2906.44"));
-        a1.setContractPrice(BigDecimal.valueOf(175));
-        final ContractLimitOrder a2 = new ContractLimitOrder(Order.OrderType.ASK, new BigDecimal("4.9157"), CurrencyPair.BTC_USD, null, date, new BigDecimal("2909.0"));
-        a2.setContractPrice(BigDecimal.valueOf(143));
-        final ContractLimitOrder a3 = new ContractLimitOrder(Order.OrderType.ASK, new BigDecimal("6.0123"), CurrencyPair.BTC_USD, null, date, new BigDecimal("2910.68"));
-        a3.setContractPrice(BigDecimal.valueOf(40));
+        final ContractLimitOrder a1 = new ContractLimitOrder(Order.OrderType.ASK, BigDecimal.valueOf(40), CurrencyPair.BTC_USD, null, date, new BigDecimal("2906.44"));
+        a1.setAmountInBaseCurrency(new BigDecimal("1.3762"));
+        final ContractLimitOrder a2 = new ContractLimitOrder(Order.OrderType.ASK, BigDecimal.valueOf(143), CurrencyPair.BTC_USD, null, date, new BigDecimal("2909.0"));
+        a2.setAmountInBaseCurrency(new BigDecimal("4.9157"));
+        final ContractLimitOrder a3 = new ContractLimitOrder(Order.OrderType.ASK, BigDecimal.valueOf(175), CurrencyPair.BTC_USD, null, date, new BigDecimal("2910.68"));
+        a3.setAmountInBaseCurrency(new BigDecimal("6.0123"));
         asks.add(a1);
         asks.add(a2);
         asks.add(a3);
