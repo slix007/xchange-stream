@@ -2,9 +2,11 @@ package info.bitrich.xchangestream.okex;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import info.bitrich.xchangestream.core.StreamingMarketDataService;
 import info.bitrich.xchangestream.okcoin.OkCoinStreamingService;
+import info.bitrich.xchangestream.okex.dto.FutureIndex;
 
 import org.knowm.xchange.currency.CurrencyPair;
 import org.knowm.xchange.dto.marketdata.OrderBook;
@@ -84,4 +86,17 @@ public class OkExStreamingMarketDataService implements StreamingMarketDataServic
     public Observable<Trade> getTrades(CurrencyPair currencyPair, Object... args) {
         throw new NotYetImplementedForExchangeException("Use StreamingPrivateMarketDataService instead");
     }
+
+    public Observable<FutureIndex> getFutureIndex() {
+        String channel = String.format("ok_sub_futureusd_%s_index", "btc"); // btc or ltc
+        return service.subscribeChannel(channel)
+                .map(s -> {
+                    ObjectMapper mapper = new ObjectMapper();
+                    mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+                    mapper.registerModule(new JavaTimeModule());
+
+                    return mapper.treeToValue(s.get("data"), FutureIndex.class);
+                });
+    }
+
 }
