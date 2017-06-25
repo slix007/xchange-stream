@@ -1,6 +1,5 @@
 package info.bitrich.xchangestream.okex;
 
-import info.bitrich.xchangestream.okcoin.dto.OkCoinTradeResult;
 import info.bitrich.xchangestream.okex.dto.BalanceEx;
 import info.bitrich.xchangestream.okex.dto.OkExTradeResult;
 import info.bitrich.xchangestream.okex.dto.OkExUserInfoResult;
@@ -9,7 +8,6 @@ import org.knowm.xchange.currency.Currency;
 import org.knowm.xchange.currency.CurrencyPair;
 import org.knowm.xchange.dto.Order;
 import org.knowm.xchange.dto.account.AccountInfo;
-import org.knowm.xchange.dto.account.Balance;
 import org.knowm.xchange.dto.account.Wallet;
 import org.knowm.xchange.dto.marketdata.OrderBook;
 import org.knowm.xchange.dto.trade.ContractLimitOrder;
@@ -22,46 +20,25 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 
 /**
  * Created by Sergey Shurmin on 6/20/17.
  */
 public class OkExAdapters {
 
-    /**
-     * getTotal == Wallet Balance<br>
-     * getAvailable == Available Balance
-     */
-    public final static Currency WALLET_CURRENCY = new Currency("WALLET");
-    /**
-     * getTotal == Margin Balance<br>
-     * getAvailable == Margin Balance
-     */
-    public final static Currency MARGIN_CURRENCY = new Currency("MARGIN");
-    /**
-     * getFrozen == bondfreez
-     */
-    public final static Currency POSITION_LONG_CURRENCY = new Currency("POSITION_LONG");
-
-    /**
-     * getFrozen == bondfreez
-     */
-    public final static Currency POSITION_SHORT_CURRENCY = new Currency("POSITION_SHORT");
-
     public static AccountInfo adaptUserInfo(OkExUserInfoResult okExUserInfoResult, String raw) {
         final OkExUserInfoResult.BalanceInfo btcInfo = okExUserInfoResult.getBtcInfo();
-        Map<String, Balance.Builder> builders = new TreeMap<>();
 
-        final BigDecimal total = btcInfo.getAccountRights();
-        final BigDecimal equity = btcInfo.getKeepDeposit();
-        final BigDecimal available = total.subtract(equity);
+        final BigDecimal equity = btcInfo.getAccountRights();
+        final BigDecimal margin = btcInfo.getKeepDeposit();
+        final BigDecimal upl = btcInfo.getProfitUnreal();
+        final BigDecimal wallet = equity.subtract(upl);
+        final BigDecimal available = equity.subtract(margin);
 
-        final BalanceEx balance = new BalanceEx(OkExAdapters.WALLET_CURRENCY,
-                total,
+        final BalanceEx balance = new BalanceEx(Currency.BTC,
+                wallet,
                 available,
-                equity);
+                margin);
         balance.setRaw(raw);
 
         return new AccountInfo(new Wallet(balance));

@@ -12,10 +12,17 @@ public class PrivateData {
 
     private List<LimitOrder> trades;
     private AccountInfo accountInfo;
+    private PositionInfo positionInfo;
 
     public PrivateData(List<LimitOrder> trades, AccountInfo accountInfo) {
         this.trades = trades;
         this.accountInfo = accountInfo;
+    }
+
+    public PrivateData(List<LimitOrder> trades, AccountInfo accountInfo, PositionInfo positionInfo) {
+        this.trades = trades;
+        this.accountInfo = accountInfo;
+        this.positionInfo = positionInfo;
     }
 
     public void setTrades(List<LimitOrder> trades) {
@@ -32,6 +39,14 @@ public class PrivateData {
 
     public AccountInfo getAccountInfo() {
         return accountInfo;
+    }
+
+    public PositionInfo getPositionInfo() {
+        return positionInfo;
+    }
+
+    public void setPositionInfo(PositionInfo positionInfo) {
+        this.positionInfo = positionInfo;
     }
 
     @Override
@@ -51,6 +66,7 @@ public class PrivateData {
         return "PrivateData{" +
                 "trades=" + tradesString +
                 ", accountInfo=" + accountInfo +
+                ", positionInfo=" + positionInfo +
                 '}';
     }
 }

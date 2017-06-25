@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import info.bitrich.xchangestream.core.StreamingPrivateDataService;
+import info.bitrich.xchangestream.core.dto.PositionInfo;
 import info.bitrich.xchangestream.core.dto.PrivateData;
 import info.bitrich.xchangestream.okcoin.OkCoinAuthSigner;
 import info.bitrich.xchangestream.okcoin.OkCoinStreamingService;
@@ -13,6 +14,7 @@ import info.bitrich.xchangestream.okex.dto.BalanceEx;
 import info.bitrich.xchangestream.okex.dto.OkExTradeResult;
 
 import org.knowm.xchange.Exchange;
+import org.knowm.xchange.currency.Currency;
 import org.knowm.xchange.dto.account.AccountInfo;
 import org.knowm.xchange.dto.account.Wallet;
 import org.knowm.xchange.dto.trade.LimitOrder;
@@ -69,6 +71,7 @@ public class OkExStreamingPrivateDataService implements StreamingPrivateDataServ
 
         List<LimitOrder> trades = new ArrayList<>();
         AccountInfo accountInfo = null;
+        PositionInfo positionInfo = null;
 
         final JsonNode channel = jsonNode.get("channel");
         if (channel != null) {
@@ -88,55 +91,45 @@ public class OkExStreamingPrivateDataService implements StreamingPrivateDataServ
                     final BigDecimal total = new BigDecimal(dataNode.get("balance").asText());
                     final BigDecimal amountStr = new BigDecimal(dataNode.get("unit_amount").asText());
                     final BigDecimal profitReal = new BigDecimal(dataNode.get("profit_real").asText());
-                    final BigDecimal equity = new BigDecimal(dataNode.get("keep_deposit").asText());
-                    final BigDecimal available = total.subtract(equity);
-                    final BalanceEx balance = new BalanceEx(OkExAdapters.WALLET_CURRENCY,
-                            total,
-                            available,
-                            equity);
+                    final BigDecimal margin = new BigDecimal(dataNode.get("keep_deposit").asText());
+//                    final BigDecimal available = total.subtract(equity);
+                    final BalanceEx balance = new BalanceEx(Currency.BTC,
+                            BigDecimal.ZERO,
+                            BigDecimal.ZERO,
+                            margin);
                     balance.setRaw(dataNode.toString());
                     accountInfo = new AccountInfo(new Wallet(balance));
                     break;
                 case "ok_sub_futureusd_positions":
                     final JsonNode positionsNode = dataNode.get("positions");
-                    accountInfo = adaptPosition(positionsNode);
+                    positionInfo = adaptPosition(positionsNode);
                     break;
                 default:
                     System.out.println("Warning unknown response channel");
             }
         }
 
-        return new PrivateData(trades, accountInfo);
+        return new PrivateData(trades, accountInfo, positionInfo);
     }
 
-    private AccountInfo adaptPosition(JsonNode positionsNode) {
+    private PositionInfo adaptPosition(JsonNode positionsNode) {
         logger.info(positionsNode.toString());
-        BalanceEx balance1 = BalanceEx.zero(OkExAdapters.POSITION_LONG_CURRENCY);
-        BalanceEx balance2 = BalanceEx.zero(OkExAdapters.POSITION_SHORT_CURRENCY);
-        for (JsonNode node : positionsNode) {
 
-            final String contractAmount = node.get("hold_amount").asText();
-            final String available = node.get("eveningup").asText();
-            final String bondfreez = node.get("bondfreez").asText();
+        BigDecimal positionLong = BigDecimal.ZERO;
+        BigDecimal positionShort = BigDecimal.ZERO;
+        for (JsonNode node : positionsNode) {
+            final String holdAmountInContracts = node.get("hold_amount").asText();
+//            final String available = node.get("eveningup").asText();
+//            final String bondfreez = node.get("bondfreez").asText();
             final String position = node.get("position").asText();
             if (position.equals("1")) { // long - buy - bid
-                balance1 = new BalanceEx(OkExAdapters.POSITION_LONG_CURRENCY,
-                        new BigDecimal(contractAmount),
-                        new BigDecimal(available),
-                        new BigDecimal(bondfreez)
-                );
-                balance1.setRaw(positionsNode.toString());
+                positionLong = new BigDecimal(holdAmountInContracts);
             } else if (position.equals("2")) { // short - sell - ask
-                balance2 = new BalanceEx(OkExAdapters.POSITION_SHORT_CURRENCY,
-                        new BigDecimal(contractAmount),
-                        new BigDecimal(available),
-                        new BigDecimal(bondfreez)
-                );
-                balance2.setRaw(positionsNode.toString());
+                positionShort = new BigDecimal(holdAmountInContracts);
             }
         }
 
-        return new AccountInfo(new Wallet(balance1, balance2));
+        return new PositionInfo(positionLong, positionShort, positionsNode.toString());
     }
 
 }
