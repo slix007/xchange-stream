@@ -65,7 +65,8 @@ public class OkExAdapters {
 
     private static LimitOrder adaptLimitOrder(Order.OrderType type, BigDecimal[] data, CurrencyPair currencyPair, String id, Date timestamp) {
         // [Price, Amount(Contract), Amount(Coin),Cumulant(Coin),Cumulant(Contract)]
-        final ContractLimitOrder contractLimitOrder = new ContractLimitOrder(type, data[1], currencyPair, id, timestamp, data[0]);
+        final BigDecimal tradableAmount = data[1].setScale(0, BigDecimal.ROUND_HALF_UP);
+        final ContractLimitOrder contractLimitOrder = new ContractLimitOrder(type, tradableAmount, currencyPair, id, timestamp, data[0]);
         contractLimitOrder.setAmountInBaseCurrency(data[2]);
         return contractLimitOrder;
     }
