@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 
 import io.reactivex.Observable;
+import io.reactivex.schedulers.Schedulers;
 
 /**
  * Created by Sergey Shurmin on 6/18/17.
@@ -60,6 +61,49 @@ public class OkExStreamingPrivateDataService implements StreamingPrivateDataServ
                         "ok_sub_futureusd_trades"),
                 apiKey,
                 sign)
+                .observeOn(Schedulers.computation())
+                .map(this::parseResult);
+    }
+
+    public Observable<PrivateData> getUserInfoObservable() {
+        final String apiKey = exchange.getExchangeSpecification().getApiKey();
+        final String secretKey = exchange.getExchangeSpecification().getSecretKey();
+        final OkCoinAuthSigner signer = new OkCoinAuthSigner(apiKey, secretKey);
+        final Map<String, String> nameValueMap = new HashMap<>();
+        final String sign = signer.digestParams(nameValueMap);
+
+        return service.subscribeChannel("ok_sub_futureusd_userinfo",
+                apiKey,
+                sign)
+                .observeOn(Schedulers.computation())
+                .map(this::parseResult);
+    }
+
+    public Observable<PrivateData> getTradesObservable() {
+        final String apiKey = exchange.getExchangeSpecification().getApiKey();
+        final String secretKey = exchange.getExchangeSpecification().getSecretKey();
+        final OkCoinAuthSigner signer = new OkCoinAuthSigner(apiKey, secretKey);
+        final Map<String, String> nameValueMap = new HashMap<>();
+        final String sign = signer.digestParams(nameValueMap);
+
+        return service.subscribeChannel("ok_sub_futureusd_trades",
+                apiKey,
+                sign)
+                .observeOn(Schedulers.computation())
+                .map(this::parseResult);
+    }
+
+    public Observable<PrivateData> getPositionObservable() {
+        final String apiKey = exchange.getExchangeSpecification().getApiKey();
+        final String secretKey = exchange.getExchangeSpecification().getSecretKey();
+        final OkCoinAuthSigner signer = new OkCoinAuthSigner(apiKey, secretKey);
+        final Map<String, String> nameValueMap = new HashMap<>();
+        final String sign = signer.digestParams(nameValueMap);
+
+        return service.subscribeChannel("ok_sub_futureusd_positions",
+                apiKey,
+                sign)
+                .observeOn(Schedulers.computation())
                 .map(this::parseResult);
     }
 
@@ -77,7 +121,7 @@ public class OkExStreamingPrivateDataService implements StreamingPrivateDataServ
         if (channel != null) {
             final JsonNode dataNode = jsonNode.get("data");
 
-            System.out.println(channel.asText() + ":" + dataNode.toString());
+            logger.debug("PrivateData:" + channel.asText() + ":" + dataNode.toString());
 
             switch (channel.asText()) {
                 case "ok_sub_futureusd_trades":
@@ -113,8 +157,6 @@ public class OkExStreamingPrivateDataService implements StreamingPrivateDataServ
     }
 
     private PositionInfo adaptPosition(JsonNode positionsNode) {
-        logger.info(positionsNode.toString());
-
         BigDecimal positionLong = BigDecimal.ZERO;
         BigDecimal positionShort = BigDecimal.ZERO;
         for (JsonNode node : positionsNode) {

@@ -241,6 +241,7 @@ public abstract class NettyStreamingService<T> {
                 e.onError(throwable);
             }
         }).doOnDispose(() -> {
+            LOG.warn("Unsubscribing from channel {}", externalChannelName);
             sendMessage(getUnsubscribeMessage(externalChannelName));
             for (String channelName : internalChannelNames) {
                 channels.remove(channelName);
@@ -283,7 +284,7 @@ public abstract class NettyStreamingService<T> {
     protected void handleChannelError(String channel, Throwable t) {
         ObservableEmitter<T> emitter = channels.get(channel);
         if (emitter == null) {
-            LOG.debug("No subscriber for channel {}.", channel);
+            LOG.warn("No subscriber for channel {}.", channel);
             return;
         }
 
