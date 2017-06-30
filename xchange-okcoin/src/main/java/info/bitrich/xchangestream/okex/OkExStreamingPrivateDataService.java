@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import info.bitrich.xchangestream.core.StreamingPrivateDataService;
-import info.bitrich.xchangestream.core.dto.PositionInfo;
 import info.bitrich.xchangestream.core.dto.PrivateData;
 import info.bitrich.xchangestream.okcoin.OkCoinAuthSigner;
 import info.bitrich.xchangestream.okcoin.OkCoinStreamingService;
@@ -16,6 +15,7 @@ import info.bitrich.xchangestream.okex.dto.OkExTradeResult;
 import org.knowm.xchange.Exchange;
 import org.knowm.xchange.currency.Currency;
 import org.knowm.xchange.dto.account.AccountInfo;
+import org.knowm.xchange.dto.account.Position;
 import org.knowm.xchange.dto.account.Wallet;
 import org.knowm.xchange.dto.trade.LimitOrder;
 import org.slf4j.Logger;
@@ -115,7 +115,7 @@ public class OkExStreamingPrivateDataService implements StreamingPrivateDataServ
 
         List<LimitOrder> trades = new ArrayList<>();
         AccountInfo accountInfo = null;
-        PositionInfo positionInfo = null;
+        Position positionInfo = null;
 
         final JsonNode channel = jsonNode.get("channel");
         if (channel != null) {
@@ -156,7 +156,7 @@ public class OkExStreamingPrivateDataService implements StreamingPrivateDataServ
         return new PrivateData(trades, accountInfo, positionInfo);
     }
 
-    private PositionInfo adaptPosition(JsonNode positionsNode) {
+    private Position adaptPosition(JsonNode positionsNode) {
         BigDecimal positionLong = BigDecimal.ZERO;
         BigDecimal positionShort = BigDecimal.ZERO;
         for (JsonNode node : positionsNode) {
@@ -171,7 +171,7 @@ public class OkExStreamingPrivateDataService implements StreamingPrivateDataServ
             }
         }
 
-        return new PositionInfo(positionLong, positionShort, positionsNode.toString());
+        return new Position(positionLong, positionShort, BigDecimal.ZERO, positionsNode.toString());
     }
 
 }
