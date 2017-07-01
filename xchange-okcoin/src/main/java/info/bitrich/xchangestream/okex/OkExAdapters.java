@@ -29,11 +29,11 @@ public class OkExAdapters {
     public static AccountInfo adaptUserInfo(OkExUserInfoResult okExUserInfoResult, String raw) {
         final OkExUserInfoResult.BalanceInfo btcInfo = okExUserInfoResult.getBtcInfo();
 
-        final BigDecimal equity = btcInfo.getAccountRights();
-        final BigDecimal margin = btcInfo.getKeepDeposit();
-        final BigDecimal upl = btcInfo.getProfitUnreal();
-        final BigDecimal wallet = equity.subtract(upl);
-        final BigDecimal available = equity.subtract(margin);
+        final BigDecimal equity = btcInfo.getAccountRights().setScale(8, BigDecimal.ROUND_HALF_UP);
+        final BigDecimal margin = btcInfo.getKeepDeposit().setScale(8, BigDecimal.ROUND_HALF_UP);
+        final BigDecimal upl = btcInfo.getProfitUnreal().setScale(8, BigDecimal.ROUND_HALF_UP);
+        final BigDecimal wallet = equity.subtract(upl).setScale(8, BigDecimal.ROUND_HALF_UP);
+        final BigDecimal available = equity.subtract(margin).setScale(8, BigDecimal.ROUND_HALF_UP);
 
         final BalanceEx balance = new BalanceEx(Currency.BTC,
                 wallet,
