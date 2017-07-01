@@ -1,6 +1,7 @@
 package info.bitrich.xchangestream.core.dto;
 
 import org.knowm.xchange.dto.account.AccountInfo;
+import org.knowm.xchange.dto.account.AccountInfoContracts;
 import org.knowm.xchange.dto.account.Position;
 import org.knowm.xchange.dto.trade.LimitOrder;
 
@@ -13,6 +14,7 @@ public class PrivateData {
 
     private List<LimitOrder> trades;
     private AccountInfo accountInfo;
+    private AccountInfoContracts accountInfoContracts;
     private Position positionInfo;
 
     public PrivateData(List<LimitOrder> trades, AccountInfo accountInfo) {
@@ -20,9 +22,9 @@ public class PrivateData {
         this.accountInfo = accountInfo;
     }
 
-    public PrivateData(List<LimitOrder> trades, AccountInfo accountInfo, Position positionInfo) {
+    public PrivateData(List<LimitOrder> trades, AccountInfoContracts accountInfoContracts, Position positionInfo) {
         this.trades = trades;
-        this.accountInfo = accountInfo;
+        this.accountInfoContracts = accountInfoContracts;
         this.positionInfo = positionInfo;
     }
 
@@ -50,6 +52,14 @@ public class PrivateData {
         this.positionInfo = positionInfo;
     }
 
+    public AccountInfoContracts getAccountInfoContracts() {
+        return accountInfoContracts;
+    }
+
+    public void setAccountInfoContracts(AccountInfoContracts accountInfoContracts) {
+        this.accountInfoContracts = accountInfoContracts;
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -67,6 +77,7 @@ public class PrivateData {
         return "PrivateData{" +
                 "trades=" + tradesString +
                 ", accountInfo=" + accountInfo +
+                ", accountInfoContracts=" + accountInfoContracts +
                 ", positionInfo=" + positionInfo +
                 '}';
     }

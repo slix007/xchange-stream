@@ -14,9 +14,8 @@ import info.bitrich.xchangestream.okex.dto.OkExTradeResult;
 
 import org.knowm.xchange.Exchange;
 import org.knowm.xchange.currency.Currency;
-import org.knowm.xchange.dto.account.AccountInfo;
+import org.knowm.xchange.dto.account.AccountInfoContracts;
 import org.knowm.xchange.dto.account.Position;
-import org.knowm.xchange.dto.account.Wallet;
 import org.knowm.xchange.dto.trade.LimitOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -114,7 +113,7 @@ public class OkExStreamingPrivateDataService implements StreamingPrivateDataServ
         mapper.registerModule(new JavaTimeModule());
 
         List<LimitOrder> trades = new ArrayList<>();
-        AccountInfo accountInfo = null;
+        AccountInfoContracts accountInfo = null;
         Position positionInfo = null;
 
         final JsonNode channel = jsonNode.get("channel");
@@ -132,17 +131,18 @@ public class OkExStreamingPrivateDataService implements StreamingPrivateDataServ
                     break;
                 case "ok_sub_futureusd_userinfo":
                     // TODO parse user info
-                    final BigDecimal total = new BigDecimal(dataNode.get("balance").asText());
+                    final BigDecimal wallet = new BigDecimal(dataNode.get("balance").asText());
                     final BigDecimal amountStr = new BigDecimal(dataNode.get("unit_amount").asText());
                     final BigDecimal profitReal = new BigDecimal(dataNode.get("profit_real").asText());
                     final BigDecimal margin = new BigDecimal(dataNode.get("keep_deposit").asText());
-//                    final BigDecimal available = total.subtract(equity);
+//                    final BigDecimal available = wallet.subtract(equity);
                     final BalanceEx balance = new BalanceEx(Currency.BTC,
                             BigDecimal.ZERO,
                             BigDecimal.ZERO,
                             margin);
                     balance.setRaw(dataNode.toString());
-                    accountInfo = new AccountInfo(new Wallet(balance));
+                    accountInfo = new AccountInfoContracts(wallet, BigDecimal.ZERO, BigDecimal.ZERO,
+                            margin, BigDecimal.ZERO, profitReal, BigDecimal.ZERO);
                     break;
                 case "ok_sub_futureusd_positions":
                     final JsonNode positionsNode = dataNode.get("positions");
