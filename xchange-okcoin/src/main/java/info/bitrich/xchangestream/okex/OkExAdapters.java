@@ -1,14 +1,11 @@
 package info.bitrich.xchangestream.okex;
 
-import info.bitrich.xchangestream.okex.dto.BalanceEx;
 import info.bitrich.xchangestream.okex.dto.OkExTradeResult;
 import info.bitrich.xchangestream.okex.dto.OkExUserInfoResult;
 
-import org.knowm.xchange.currency.Currency;
 import org.knowm.xchange.currency.CurrencyPair;
 import org.knowm.xchange.dto.Order;
-import org.knowm.xchange.dto.account.AccountInfo;
-import org.knowm.xchange.dto.account.Wallet;
+import org.knowm.xchange.dto.account.AccountInfoContracts;
 import org.knowm.xchange.dto.marketdata.OrderBook;
 import org.knowm.xchange.dto.trade.ContractLimitOrder;
 import org.knowm.xchange.dto.trade.LimitOrder;
@@ -26,7 +23,7 @@ import java.util.List;
  */
 public class OkExAdapters {
 
-    public static AccountInfo adaptUserInfo(OkExUserInfoResult okExUserInfoResult, String raw) {
+    public static AccountInfoContracts adaptUserInfo(OkExUserInfoResult okExUserInfoResult, String raw) {
         final OkExUserInfoResult.BalanceInfo btcInfo = okExUserInfoResult.getBtcInfo();
 
         final BigDecimal equity = btcInfo.getAccountRights().setScale(8, BigDecimal.ROUND_HALF_UP);
@@ -34,14 +31,10 @@ public class OkExAdapters {
         final BigDecimal upl = btcInfo.getProfitUnreal().setScale(8, BigDecimal.ROUND_HALF_UP);
         final BigDecimal wallet = equity.subtract(upl).setScale(8, BigDecimal.ROUND_HALF_UP);
         final BigDecimal available = equity.subtract(margin).setScale(8, BigDecimal.ROUND_HALF_UP);
+        final BigDecimal rpl = btcInfo.getProfitReal().setScale(8, BigDecimal.ROUND_HALF_UP);
+        final BigDecimal riskRate = btcInfo.getRiskRate().setScale(8, BigDecimal.ROUND_HALF_UP);
 
-        final BalanceEx balance = new BalanceEx(Currency.BTC,
-                wallet,
-                available,
-                margin);
-        balance.setRaw(raw);
-
-        return new AccountInfo(new Wallet(balance));
+        return new AccountInfoContracts(wallet, available, equity, margin, upl, rpl, riskRate);
     }
 
     public static OrderBook adaptOrderBook(OkCoinDepth depth, CurrencyPair currencyPair) {

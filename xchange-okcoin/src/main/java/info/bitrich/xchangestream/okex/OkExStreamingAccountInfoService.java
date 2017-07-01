@@ -11,7 +11,7 @@ import info.bitrich.xchangestream.okcoin.OkCoinStreamingService;
 import info.bitrich.xchangestream.okex.dto.OkExUserInfoResult;
 
 import org.knowm.xchange.Exchange;
-import org.knowm.xchange.dto.account.AccountInfo;
+import org.knowm.xchange.dto.account.AccountInfoContracts;
 import org.knowm.xchange.exceptions.ExchangeException;
 
 import java.util.ArrayList;
@@ -35,7 +35,7 @@ public class OkExStreamingAccountInfoService {
         this.exchange = exchange;
     }
 
-    public AccountInfo getAccountInfo() {
+    public AccountInfoContracts getAccountInfo() {
         final String apiKey = exchange.getExchangeSpecification().getApiKey();
         final String secretKey = exchange.getExchangeSpecification().getSecretKey();
         final OkCoinAuthSigner signer = new OkCoinAuthSigner(apiKey, secretKey);
@@ -46,7 +46,7 @@ public class OkExStreamingAccountInfoService {
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         mapper.registerModule(new JavaTimeModule());
 
-        List<AccountInfo> accountInfo = new ArrayList<>();
+        List<AccountInfoContracts> accountInfo = new ArrayList<>();
 
         service.subscribeChannel("ok_futureusd_userinfo", apiKey, sign)
                 .take(1)
@@ -64,10 +64,10 @@ public class OkExStreamingAccountInfoService {
                         throwable -> {
                             throw new ExchangeException(throwable.getMessage());
                         });
-        return accountInfo.size() > 0 ? accountInfo.get(0) : new AccountInfo();
+        return accountInfo.size() > 0 ? accountInfo.get(0) : new AccountInfoContracts();
     }
 
-    public Observable<AccountInfo> accountInfoObservable() {
+    public Observable<AccountInfoContracts> accountInfoObservable() {
         final String apiKey = exchange.getExchangeSpecification().getApiKey();
         final String secretKey = exchange.getExchangeSpecification().getSecretKey();
         final OkCoinAuthSigner signer = new OkCoinAuthSigner(apiKey, secretKey);
@@ -77,8 +77,6 @@ public class OkExStreamingAccountInfoService {
         ObjectMapper mapper = new ObjectMapper();
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         mapper.registerModule(new JavaTimeModule());
-
-        List<AccountInfo> accountInfo = new ArrayList<>();
 
         return service.subscribeChannel("ok_futureusd_userinfo", apiKey, sign)
                 .map(jsonNode -> {
