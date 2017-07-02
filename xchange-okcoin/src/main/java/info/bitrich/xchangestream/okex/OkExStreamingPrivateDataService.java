@@ -132,15 +132,10 @@ public class OkExStreamingPrivateDataService implements StreamingPrivateDataServ
                 case "ok_sub_futureusd_userinfo":
                     // TODO parse user info
                     final BigDecimal wallet = new BigDecimal(dataNode.get("balance").asText());
-                    final BigDecimal amountStr = new BigDecimal(dataNode.get("unit_amount").asText());
+//                    final BigDecimal amountStr = new BigDecimal(dataNode.get("unit_amount").asText());
                     final BigDecimal profitReal = new BigDecimal(dataNode.get("profit_real").asText());
                     final BigDecimal margin = new BigDecimal(dataNode.get("keep_deposit").asText());
 //                    final BigDecimal available = wallet.subtract(equity);
-                    final BalanceEx balance = new BalanceEx(Currency.BTC,
-                            BigDecimal.ZERO,
-                            BigDecimal.ZERO,
-                            margin);
-                    balance.setRaw(dataNode.toString());
                     accountInfo = new AccountInfoContracts(wallet, BigDecimal.ZERO, BigDecimal.ZERO,
                             margin, BigDecimal.ZERO, profitReal, BigDecimal.ZERO);
                     break;
