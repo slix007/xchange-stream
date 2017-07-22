@@ -172,13 +172,15 @@ public abstract class NettyStreamingService<T> {
         LOG.debug("Sending message: {}", message);
 
         if (webSocketChannel == null || !webSocketChannel.isOpen()) {
-            LOG.warn("WebSocket is not open! Call connect first.");
-            return;
+            final String errorMsg = "WebSocket is not open! Call connect first.";
+            LOG.warn(errorMsg);
+            throw new NotConnectedException();
         }
 
         if (!webSocketChannel.isWritable()) {
-            LOG.warn("Cannot send data to WebSocket as it is not writable.");
-            return;
+            final String errorMsg = "Cannot send data to WebSocket as it is not writable.";
+            LOG.warn(errorMsg);
+            throw new NotConnectedException();
         }
 
         WebSocketFrame frame = new TextWebSocketFrame(message);

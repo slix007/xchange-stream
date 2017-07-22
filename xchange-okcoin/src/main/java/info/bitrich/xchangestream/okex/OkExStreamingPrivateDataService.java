@@ -166,7 +166,7 @@ public class OkExStreamingPrivateDataService implements StreamingPrivateDataServ
             }
         }
 
-        return new Position(positionLong, positionShort, BigDecimal.ZERO, positionsNode.toString());
+        return new Position(positionLong, positionShort, BigDecimal.ZERO, BigDecimal.ZERO, positionsNode.toString());
     }
 
 }
