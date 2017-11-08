@@ -34,7 +34,7 @@ public class OkExAdapters {
         final BigDecimal rpl = btcInfo.getProfitReal().setScale(8, BigDecimal.ROUND_HALF_UP);
         final BigDecimal riskRate = btcInfo.getRiskRate().setScale(8, BigDecimal.ROUND_HALF_UP);
 
-        return new AccountInfoContracts(wallet, available, equity, margin, upl, rpl, riskRate);
+        return new AccountInfoContracts(wallet, available, null, equity, null, null, margin, upl, rpl, riskRate);
     }
 
     public static OrderBook adaptOrderBook(OkCoinDepth depth, CurrencyPair currencyPair) {
