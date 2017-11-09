@@ -82,7 +82,10 @@ public class OkExStreamingAccountInfoService {
                 .map(jsonNode -> {
                     final JsonNode dataNode = jsonNode.get("data");
                     if (!dataNode.get("result").asBoolean()) {
-                        throw new ExchangeException(jsonNode.get("error_code").asText());
+                        throw new ExchangeException(String.format("Translated error: %s(%s). Full response: %s",
+                                jsonNode.get("error_code") != null ? jsonNode.get("error_code").asText() : "",
+                                jsonNode.get("errorcode") != null ? jsonNode.get("errorcode").asText() : "",
+                                jsonNode));
                     }
                     final JsonNode infoNode = dataNode.get("info");
                     final OkExUserInfoResult infoResult = mapper.treeToValue(infoNode, OkExUserInfoResult.class);
