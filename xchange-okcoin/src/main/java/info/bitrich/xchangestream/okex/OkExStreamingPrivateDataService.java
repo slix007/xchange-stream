@@ -9,11 +9,9 @@ import info.bitrich.xchangestream.core.StreamingPrivateDataService;
 import info.bitrich.xchangestream.core.dto.PrivateData;
 import info.bitrich.xchangestream.okcoin.OkCoinAuthSigner;
 import info.bitrich.xchangestream.okcoin.OkCoinStreamingService;
-import info.bitrich.xchangestream.okex.dto.BalanceEx;
 import info.bitrich.xchangestream.okex.dto.OkExTradeResult;
 
 import org.knowm.xchange.Exchange;
-import org.knowm.xchange.currency.Currency;
 import org.knowm.xchange.dto.account.AccountInfoContracts;
 import org.knowm.xchange.dto.account.Position;
 import org.knowm.xchange.dto.trade.LimitOrder;
@@ -54,8 +52,10 @@ public class OkExStreamingPrivateDataService implements StreamingPrivateDataServ
 
         // The same info for all subscriptions:
         // Successful response for all: [{"data":{"result":"true"},"channel":"login"}]
-        return service.subscribeBatchChannels("ok_sub_futureusd_userinfo",
-                Arrays.asList("ok_sub_futureusd_userinfo",
+        return service.subscribeBatchChannels("ok_futureusd_userinfo",
+                Arrays.asList(
+                        "ok_futureusd_userinfo",
+                        "ok_sub_futureusd_userinfo",
                         "ok_sub_futureusd_positions",
                         "ok_sub_futureusd_trades"),
                 apiKey,
@@ -121,30 +121,36 @@ public class OkExStreamingPrivateDataService implements StreamingPrivateDataServ
             final JsonNode dataNode = jsonNode.get("data");
 
             logger.debug("PrivateData:" + channel.asText() + ":" + dataNode.toString());
+            if (!dataNode.get("result").asBoolean()) {
+                logger.error("PrivateData:" + channel.asText() + ":" + dataNode.toString());
+                // empty answer.
 
-            switch (channel.asText()) {
-                case "ok_sub_futureusd_trades":
-                    // TODO parse future trades
-                    final OkExTradeResult okExTradeResult = mapper.treeToValue(dataNode, OkExTradeResult.class);
-                    final LimitOrder limitOrder = OkExAdapters.adaptTradeResult(okExTradeResult);
-                    trades.add(limitOrder);
-                    break;
-                case "ok_sub_futureusd_userinfo":
-                    // TODO parse user info
-                    final BigDecimal wallet = new BigDecimal(dataNode.get("balance").asText());
+            } else {
+
+                switch (channel.asText()) {
+                    case "ok_sub_futureusd_trades":
+                        // TODO parse future trades
+                        final OkExTradeResult okExTradeResult = mapper.treeToValue(dataNode, OkExTradeResult.class);
+                        final LimitOrder limitOrder = OkExAdapters.adaptTradeResult(okExTradeResult);
+                        trades.add(limitOrder);
+                        break;
+                    case "ok_sub_futureusd_userinfo":
+                        // TODO parse user info
+                        final BigDecimal wallet = new BigDecimal(dataNode.get("balance").asText());
 //                    final BigDecimal amountStr = new BigDecimal(dataNode.get("unit_amount").asText());
-                    final BigDecimal profitReal = new BigDecimal(dataNode.get("profit_real").asText());
-                    final BigDecimal margin = new BigDecimal(dataNode.get("keep_deposit").asText());
+                        final BigDecimal profitReal = new BigDecimal(dataNode.get("profit_real").asText());
+                        final BigDecimal margin = new BigDecimal(dataNode.get("keep_deposit").asText());
 //                    final BigDecimal available = wallet.subtract(equity);
-                    accountInfo = new AccountInfoContracts(wallet, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO,
-                            margin, BigDecimal.ZERO, profitReal, BigDecimal.ZERO);
-                    break;
-                case "ok_sub_futureusd_positions":
-                    final JsonNode positionsNode = dataNode.get("positions");
-                    positionInfo = adaptPosition(positionsNode);
-                    break;
-                default:
-                    System.out.println("Warning unknown response channel");
+                        accountInfo = new AccountInfoContracts(wallet, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO,
+                                margin, BigDecimal.ZERO, profitReal, BigDecimal.ZERO);
+                        break;
+                    case "ok_sub_futureusd_positions":
+                        final JsonNode positionsNode = dataNode.get("positions");
+                        positionInfo = adaptPosition(positionsNode);
+                        break;
+                    default:
+                        System.out.println("Warning unknown response channel");
+                }
             }
         }
 
