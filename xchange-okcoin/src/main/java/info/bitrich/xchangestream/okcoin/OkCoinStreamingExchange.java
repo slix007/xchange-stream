@@ -20,7 +20,7 @@ import io.reactivex.Completable;
  * To avoid disconnection we have to send keepalive heartbeats(ping).
  */
 public class OkCoinStreamingExchange extends OkCoinExchange implements StreamingExchange {
-    private static final String API_URI = "wss://real.okcoin.com:10440/websocket/okexapi";
+    private static final String API_URI = "wss://real.okcoin.com:10440/websocket/okcoinapi";
 
     private final OkCoinStreamingService streamingService;
     private OkCoinStreamingMarketDataService streamingMarketDataService;

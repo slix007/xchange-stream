@@ -52,7 +52,7 @@ public class OkExStreamingPrivateDataService implements StreamingPrivateDataServ
 
         // The same info for all subscriptions:
         // Successful response for all: [{"data":{"result":"true"},"channel":"login"}]
-        return service.subscribeBatchChannels("ok_futureusd_userinfo",
+        return service.subscribeBatchChannels("login",
                 Arrays.asList(
                         "ok_futureusd_userinfo",
                         "ok_sub_futureusd_userinfo",
@@ -121,7 +121,7 @@ public class OkExStreamingPrivateDataService implements StreamingPrivateDataServ
             final JsonNode dataNode = jsonNode.get("data");
 
             logger.debug("PrivateData:" + channel.asText() + ":" + dataNode.toString());
-            if (!dataNode.get("result").asBoolean()) {
+            if (dataNode.get("result") != null && !dataNode.get("result").asBoolean()) {
                 logger.error("PrivateData:" + channel.asText() + ":" + dataNode.toString());
                 // empty answer.
 
@@ -134,6 +134,7 @@ public class OkExStreamingPrivateDataService implements StreamingPrivateDataServ
                         final LimitOrder limitOrder = OkExAdapters.adaptTradeResult(okExTradeResult);
                         trades.add(limitOrder);
                         break;
+                    case "ok_futureusd_userinfo":
                     case "ok_sub_futureusd_userinfo":
                         // TODO parse user info
                         final BigDecimal wallet = new BigDecimal(dataNode.get("balance").asText());
@@ -149,7 +150,7 @@ public class OkExStreamingPrivateDataService implements StreamingPrivateDataServ
                         positionInfo = adaptPosition(positionsNode);
                         break;
                     default:
-                        System.out.println("Warning unknown response channel");
+                        System.out.println("WARNING unknown response channel");
                 }
             }
         }

@@ -23,7 +23,7 @@ public class OkCoinStreamingService extends JsonNettyStreamingService {
 
     @Override
     protected String getChannelNameFromMessage(JsonNode message) throws IOException {
-        return message.get("channel").asText();
+        return message.get("channel") != null ? message.get("channel").asText() : "";
     }
 
     @Override
@@ -50,7 +50,12 @@ public class OkCoinStreamingService extends JsonNettyStreamingService {
             }
         }
 
-        RequestMessage requestMessage = new RequestMessage("addChannel", channelName, requestOrderInfoParameters);
+        RequestMessage requestMessage;
+        if (channelName.equals("login")) {
+            requestMessage = new RequestMessage("login", null, requestOrderInfoParameters);
+        } else {
+            requestMessage = new RequestMessage("addChannel", channelName, requestOrderInfoParameters);
+        }
 
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerSubtypes(RequestOrderInfoParameters.class);
