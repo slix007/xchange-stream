@@ -54,7 +54,7 @@ public class OkExStreamingPrivateDataService implements StreamingPrivateDataServ
         // Successful response for all: [{"data":{"result":"true"},"channel":"login"}]
         return service.subscribeBatchChannels("login",
                 Arrays.asList(
-                        "ok_futureusd_userinfo",
+                        //"ok_futureusd_userinfo",
                         "ok_sub_futureusd_userinfo",
                         "ok_sub_futureusd_positions",
                         "ok_sub_futureusd_trades"),
