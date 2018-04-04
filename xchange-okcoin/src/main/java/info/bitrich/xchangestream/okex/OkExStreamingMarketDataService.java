@@ -7,6 +7,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import info.bitrich.xchangestream.core.StreamingMarketDataService;
 import info.bitrich.xchangestream.okcoin.OkCoinStreamingService;
 import info.bitrich.xchangestream.okex.dto.FutureIndex;
+import info.bitrich.xchangestream.okex.dto.TickerJson;
 
 import org.knowm.xchange.currency.CurrencyPair;
 import org.knowm.xchange.dto.marketdata.OrderBook;
@@ -15,6 +16,9 @@ import org.knowm.xchange.dto.marketdata.Trade;
 import org.knowm.xchange.exceptions.NotYetImplementedForExchangeException;
 import org.knowm.xchange.okcoin.FuturesContract;
 import org.knowm.xchange.okcoin.dto.marketdata.OkCoinDepth;
+
+import java.math.BigDecimal;
+import java.util.Date;
 
 import io.reactivex.Observable;
 
@@ -79,7 +83,26 @@ public class OkExStreamingMarketDataService implements StreamingMarketDataServic
 
     @Override
     public Observable<Ticker> getTicker(CurrencyPair currencyPair, Object... args) {
-        throw new NotYetImplementedForExchangeException();
+        String channel = String.format("ok_sub_futureusd_%s_ticker_%s", "btc", FuturesContract.ThisWeek.getName()); // btc or ltc
+        return service.subscribeChannel(channel)
+                .map(s -> {
+                    ObjectMapper mapper = new ObjectMapper();
+                    mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+                    mapper.registerModule(new JavaTimeModule());
+
+                    final TickerJson tickerJson = mapper.treeToValue(s.get("data"), TickerJson.class);
+
+                    return new Ticker.Builder()
+                            .currencyPair(currencyPair)
+                            .last(tickerJson.getLast())
+                            .bid(tickerJson.getBuy())
+                            .ask(tickerJson.getSell())
+                            .high(new BigDecimal(tickerJson.getLimitHigh()))
+                            .low(new BigDecimal(tickerJson.getLimitLow()))
+                            .volume(tickerJson.getVol())
+                            .timestamp(new Date())
+                            .build();
+                });
     }
 
     @Override
