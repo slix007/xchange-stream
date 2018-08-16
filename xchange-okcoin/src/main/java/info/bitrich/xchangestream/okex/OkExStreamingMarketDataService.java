@@ -3,12 +3,13 @@ package info.bitrich.xchangestream.okex;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-
 import info.bitrich.xchangestream.core.StreamingMarketDataService;
 import info.bitrich.xchangestream.okcoin.OkCoinStreamingService;
 import info.bitrich.xchangestream.okex.dto.FutureIndex;
 import info.bitrich.xchangestream.okex.dto.TickerJson;
-
+import io.reactivex.Observable;
+import java.math.BigDecimal;
+import java.util.Date;
 import org.knowm.xchange.currency.CurrencyPair;
 import org.knowm.xchange.dto.marketdata.OrderBook;
 import org.knowm.xchange.dto.marketdata.Ticker;
@@ -16,11 +17,6 @@ import org.knowm.xchange.dto.marketdata.Trade;
 import org.knowm.xchange.exceptions.NotYetImplementedForExchangeException;
 import org.knowm.xchange.okcoin.FuturesContract;
 import org.knowm.xchange.okcoin.dto.marketdata.OkCoinDepth;
-
-import java.math.BigDecimal;
-import java.util.Date;
-
-import io.reactivex.Observable;
 
 public class OkExStreamingMarketDataService implements StreamingMarketDataService {
     private final OkCoinStreamingService service;
@@ -30,7 +26,7 @@ public class OkExStreamingMarketDataService implements StreamingMarketDataServic
     }
 
     public enum Tool {
-        BTC("btc"), LTC("ltc");
+        BTC("btc"), LTC("ltc"), ETH("eth"), ETC("etc"), BCH("bch");
         String name;
         Tool(String name) {
             this.name = name;
@@ -59,18 +55,18 @@ public class OkExStreamingMarketDataService implements StreamingMarketDataServic
         // 3 value of Z is: 20, 60
         if (args.length != 3) {
             throw new IllegalArgumentException("Missing required params:\n" +
-                    "1 value of X is: btc, ltc\n" +
+                    "1 value of X is: btc, ltc, eth\n" +
                     "2 value of Y is: this_week, next_week, quarter\n" +
                     "3 value of Z is: 20, 60");
         }
-        final Tool tool = Tool.valueOf(String.valueOf(args[0]));
         final FuturesContract futuresContract = FuturesContract.valueOf(String.valueOf(args[1]));
-        final Depth depth = Depth.valueOf(String.valueOf(args[1]));
+        final Depth depth = Depth.valueOf(String.valueOf(args[2]));
 
-        return getOrderBook(currencyPair, tool, futuresContract, depth);
+        return getOrderBook(currencyPair, futuresContract, depth);
     }
 
-    public Observable<OrderBook> getOrderBook(CurrencyPair currencyPair, Tool tool, FuturesContract futuresContract, Depth depth) {
+    public Observable<OrderBook> getOrderBook(CurrencyPair currencyPair, FuturesContract futuresContract, Depth depth) {
+        final Tool tool = Tool.valueOf(currencyPair.base.getCurrencyCode());
         String channel = String.format("ok_sub_futureusd_%s_depth_%s_%s", tool.getName(), futuresContract.getName(), depth.getName());
         return service.subscribeChannel(channel)
                 .map(s -> {
@@ -83,7 +79,9 @@ public class OkExStreamingMarketDataService implements StreamingMarketDataServic
 
     @Override
     public Observable<Ticker> getTicker(CurrencyPair currencyPair, Object... args) {
-        String channel = String.format("ok_sub_futureusd_%s_ticker_%s", "btc", FuturesContract.ThisWeek.getName()); // btc or ltc
+        final String futuresContractName = ((FuturesContract) args[0]).getName();
+        final Tool tool = Tool.valueOf(currencyPair.base.getCurrencyCode());
+        final String channel = String.format("ok_sub_futureusd_%s_ticker_%s", tool.getName(), futuresContractName);
         return service.subscribeChannel(channel)
                 .map(s -> {
                     ObjectMapper mapper = new ObjectMapper();
@@ -110,8 +108,9 @@ public class OkExStreamingMarketDataService implements StreamingMarketDataServic
         throw new NotYetImplementedForExchangeException("Use StreamingPrivateMarketDataService instead");
     }
 
-    public Observable<FutureIndex> getFutureIndex() {
-        String channel = String.format("ok_sub_futureusd_%s_index", "btc"); // btc or ltc
+    public Observable<FutureIndex> getFutureIndex(CurrencyPair currencyPair) {
+        String currencyCode = currencyPair.base.getCurrencyCode().toLowerCase();
+        String channel = String.format("ok_sub_futureusd_%s_index", currencyCode);
         return service.subscribeChannel(channel)
                 .map(s -> {
                     ObjectMapper mapper = new ObjectMapper();
