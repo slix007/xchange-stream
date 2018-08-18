@@ -2,7 +2,12 @@ package info.bitrich.xchangestream.okex;
 
 import info.bitrich.xchangestream.okex.dto.OkExTradeResult;
 import info.bitrich.xchangestream.okex.dto.OkExUserInfoResult;
-
+import info.bitrich.xchangestream.okex.dto.Tool;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
 import org.knowm.xchange.currency.CurrencyPair;
 import org.knowm.xchange.dto.Order;
 import org.knowm.xchange.dto.account.AccountInfoContracts;
@@ -12,19 +17,23 @@ import org.knowm.xchange.dto.trade.LimitOrder;
 import org.knowm.xchange.okcoin.OkCoinAdapters;
 import org.knowm.xchange.okcoin.dto.marketdata.OkCoinDepth;
 
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-
 /**
  * Created by Sergey Shurmin on 6/20/17.
  */
 public class OkExAdapters {
 
-    public static AccountInfoContracts adaptUserInfo(OkExUserInfoResult okExUserInfoResult, String raw) {
-        final OkExUserInfoResult.BalanceInfo btcInfo = okExUserInfoResult.getBtcInfo();
+    public static AccountInfoContracts adaptUserInfo(Tool baseTool, OkExUserInfoResult okExUserInfoResult, String raw) {
+        final OkExUserInfoResult.BalanceInfo btcInfo;
+        switch (baseTool) {
+            case BTC:
+                btcInfo = okExUserInfoResult.getBtcInfo();
+                break;
+            case ETH:
+                btcInfo = okExUserInfoResult.getEthInfo();
+                break;
+            default:
+                throw new IllegalArgumentException("Unsuported baseTool " + baseTool);
+        }
 
         final BigDecimal equity = btcInfo.getAccountRights().setScale(8, BigDecimal.ROUND_HALF_UP);
         final BigDecimal margin = btcInfo.getKeepDeposit().setScale(8, BigDecimal.ROUND_HALF_UP);

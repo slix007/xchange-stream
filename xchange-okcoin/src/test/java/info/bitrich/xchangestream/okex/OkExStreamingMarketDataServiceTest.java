@@ -1,10 +1,18 @@
 package info.bitrich.xchangestream.okex;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import info.bitrich.xchangestream.okcoin.OkCoinStreamingService;
-
+import info.bitrich.xchangestream.okex.dto.Tool;
+import io.reactivex.Observable;
+import io.reactivex.observers.TestObserver;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.knowm.xchange.currency.CurrencyPair;
@@ -15,17 +23,6 @@ import org.knowm.xchange.dto.trade.LimitOrder;
 import org.knowm.xchange.okcoin.FuturesContract;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
-import io.reactivex.Observable;
-import io.reactivex.observers.TestObserver;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
 
 /**
  * Created by Sergey Shurmin on 6/20/17.
@@ -75,7 +72,7 @@ public class OkExStreamingMarketDataServiceTest {
         OrderBook expected = new OrderBook(date, asks, bids);
 
         // Call get order book observable
-        TestObserver<OrderBook> test = marketDataService.getOrderBook(CurrencyPair.BTC_USD, OkExStreamingMarketDataService.Tool.BTC,
+        TestObserver<OrderBook> test = marketDataService.getOrderBook(CurrencyPair.BTC_USD, Tool.BTC,
                 FuturesContract.ThisWeek, OkExStreamingMarketDataService.Depth.DEPTH_20).test();
 
         // Get order book object in correct order

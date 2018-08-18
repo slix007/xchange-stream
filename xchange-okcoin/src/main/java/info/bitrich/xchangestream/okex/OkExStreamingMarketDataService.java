@@ -7,6 +7,7 @@ import info.bitrich.xchangestream.core.StreamingMarketDataService;
 import info.bitrich.xchangestream.okcoin.OkCoinStreamingService;
 import info.bitrich.xchangestream.okex.dto.FutureIndex;
 import info.bitrich.xchangestream.okex.dto.TickerJson;
+import info.bitrich.xchangestream.okex.dto.Tool;
 import io.reactivex.Observable;
 import java.math.BigDecimal;
 import java.util.Date;
@@ -23,17 +24,6 @@ public class OkExStreamingMarketDataService implements StreamingMarketDataServic
 
     OkExStreamingMarketDataService(OkCoinStreamingService service) {
         this.service = service;
-    }
-
-    public enum Tool {
-        BTC("btc"), LTC("ltc"), ETH("eth"), ETC("etc"), BCH("bch");
-        String name;
-        Tool(String name) {
-            this.name = name;
-        }
-        public String getName() {
-            return name;
-        }
     }
 
     public enum Depth {

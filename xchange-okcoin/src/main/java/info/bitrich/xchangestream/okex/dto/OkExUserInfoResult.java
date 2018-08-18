@@ -2,7 +2,6 @@ package info.bitrich.xchangestream.okex.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.math.BigDecimal;
 
 /**
@@ -13,11 +12,14 @@ public class OkExUserInfoResult {
 
     private BalanceInfo btcInfo;
     private BalanceInfo ltcInfo;
+    private BalanceInfo ethInfo;
 
     public OkExUserInfoResult(@JsonProperty("btc") BalanceInfo btcInfo,
-                              @JsonProperty("ltc") BalanceInfo ltcInfo) {
+            @JsonProperty("ltc") BalanceInfo ltcInfo,
+            @JsonProperty("eth") BalanceInfo ethInfo) {
         this.btcInfo = btcInfo;
         this.ltcInfo = ltcInfo;
+        this.ethInfo = ethInfo;
     }
 
     public static class BalanceInfo {
@@ -66,5 +68,9 @@ public class OkExUserInfoResult {
 
     public BalanceInfo getLtcInfo() {
         return ltcInfo;
+    }
+
+    public BalanceInfo getEthInfo() {
+        return ethInfo;
     }
 }

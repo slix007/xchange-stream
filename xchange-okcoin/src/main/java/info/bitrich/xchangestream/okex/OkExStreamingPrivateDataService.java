@@ -43,7 +43,7 @@ public class OkExStreamingPrivateDataService implements StreamingPrivateDataServ
     }
 
     @Override
-    public Observable<PrivateData> getAllPrivateDataObservable() {
+    public Observable<PrivateData> getAllPrivateDataObservable(String mainToolName) {
         final String apiKey = exchange.getExchangeSpecification().getApiKey();
         final String secretKey = exchange.getExchangeSpecification().getSecretKey();
         final OkCoinAuthSigner signer = new OkCoinAuthSigner(apiKey, secretKey);
@@ -61,7 +61,7 @@ public class OkExStreamingPrivateDataService implements StreamingPrivateDataServ
                 apiKey,
                 sign)
                 .observeOn(Schedulers.computation())
-                .map(this::parseResult);
+                .map(jsonNode -> parseResult(jsonNode, mainToolName));
     }
 
     public Observable<PrivateData> getUserInfoObservable() {
@@ -75,7 +75,7 @@ public class OkExStreamingPrivateDataService implements StreamingPrivateDataServ
                 apiKey,
                 sign)
                 .observeOn(Schedulers.computation())
-                .map(this::parseResult);
+                .map(jsonNode -> parseResult(jsonNode, "btc"));
     }
 
     public Observable<PrivateData> getTradesObservable() {
@@ -89,7 +89,7 @@ public class OkExStreamingPrivateDataService implements StreamingPrivateDataServ
                 apiKey,
                 sign)
                 .observeOn(Schedulers.computation())
-                .map(this::parseResult);
+                .map(jsonNode -> parseResult(jsonNode, "btc"));
     }
 
     public Observable<PrivateData> getPositionObservable() {
@@ -103,10 +103,10 @@ public class OkExStreamingPrivateDataService implements StreamingPrivateDataServ
                 apiKey,
                 sign)
                 .observeOn(Schedulers.computation())
-                .map(this::parseResult);
+                .map(jsonNode -> parseResult(jsonNode, "btc"));
     }
 
-    PrivateData parseResult(JsonNode jsonNode) {
+    PrivateData parseResult(JsonNode jsonNode, String mainToolName) {
         List<LimitOrder> trades = new ArrayList<>();
         AccountInfoContracts accountInfo = null;
         Position positionInfo = null;
@@ -134,7 +134,7 @@ public class OkExStreamingPrivateDataService implements StreamingPrivateDataServ
                             trades.add(limitOrder);
                             break;
                         case "ok_futureusd_userinfo":
-                            final JsonNode btcNode = dataNode.get("info").get("btc");
+                            final JsonNode btcNode = dataNode.get("info").get(mainToolName);
                             final BigDecimal wallet = new BigDecimal(btcNode.get("account_rights").asText());
                             final BigDecimal profitReal = new BigDecimal(btcNode.get("profit_real").asText());
                             final BigDecimal margin = new BigDecimal(btcNode.get("keep_deposit").asText());
