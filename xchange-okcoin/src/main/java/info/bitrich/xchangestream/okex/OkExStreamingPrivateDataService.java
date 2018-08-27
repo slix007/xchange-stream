@@ -4,29 +4,25 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-
 import info.bitrich.xchangestream.core.StreamingPrivateDataService;
 import info.bitrich.xchangestream.core.dto.PrivateData;
 import info.bitrich.xchangestream.okcoin.OkCoinAuthSigner;
 import info.bitrich.xchangestream.okcoin.OkCoinStreamingService;
 import info.bitrich.xchangestream.okex.dto.OkExTradeResult;
-
-import org.knowm.xchange.Exchange;
-import org.knowm.xchange.dto.account.AccountInfoContracts;
-import org.knowm.xchange.dto.account.Position;
-import org.knowm.xchange.dto.trade.LimitOrder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import io.reactivex.Observable;
+import io.reactivex.schedulers.Schedulers;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import io.reactivex.Observable;
-import io.reactivex.schedulers.Schedulers;
+import org.knowm.xchange.Exchange;
+import org.knowm.xchange.dto.account.AccountInfoContracts;
+import org.knowm.xchange.dto.account.Position;
+import org.knowm.xchange.dto.trade.LimitOrder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Created by Sergey Shurmin on 6/18/17.
@@ -43,7 +39,7 @@ public class OkExStreamingPrivateDataService implements StreamingPrivateDataServ
     }
 
     @Override
-    public Observable<PrivateData> getAllPrivateDataObservable(String mainToolName) {
+    public Observable<PrivateData> getAllPrivateDataObservable(String mainToolName, String contractName) {
         final String apiKey = exchange.getExchangeSpecification().getApiKey();
         final String secretKey = exchange.getExchangeSpecification().getSecretKey();
         final OkCoinAuthSigner signer = new OkCoinAuthSigner(apiKey, secretKey);
@@ -61,52 +57,53 @@ public class OkExStreamingPrivateDataService implements StreamingPrivateDataServ
                 apiKey,
                 sign)
                 .observeOn(Schedulers.computation())
-                .map(jsonNode -> parseResult(jsonNode, mainToolName));
+                .map(jsonNode -> parseResult(jsonNode, mainToolName, contractName));
     }
 
-    public Observable<PrivateData> getUserInfoObservable() {
-        final String apiKey = exchange.getExchangeSpecification().getApiKey();
-        final String secretKey = exchange.getExchangeSpecification().getSecretKey();
-        final OkCoinAuthSigner signer = new OkCoinAuthSigner(apiKey, secretKey);
-        final Map<String, String> nameValueMap = new HashMap<>();
-        final String sign = signer.digestParams(nameValueMap);
+    /*
+        public Observable<PrivateData> getUserInfoObservable() {
+            final String apiKey = exchange.getExchangeSpecification().getApiKey();
+            final String secretKey = exchange.getExchangeSpecification().getSecretKey();
+            final OkCoinAuthSigner signer = new OkCoinAuthSigner(apiKey, secretKey);
+            final Map<String, String> nameValueMap = new HashMap<>();
+            final String sign = signer.digestParams(nameValueMap);
 
-        return service.subscribeChannel("ok_sub_futureusd_userinfo",
-                apiKey,
-                sign)
-                .observeOn(Schedulers.computation())
-                .map(jsonNode -> parseResult(jsonNode, "btc"));
-    }
+            return service.subscribeChannel("ok_sub_futureusd_userinfo",
+                    apiKey,
+                    sign)
+                    .observeOn(Schedulers.computation())
+                    .map(jsonNode -> parseResult(jsonNode, "btc", ""));
+        }
 
-    public Observable<PrivateData> getTradesObservable() {
-        final String apiKey = exchange.getExchangeSpecification().getApiKey();
-        final String secretKey = exchange.getExchangeSpecification().getSecretKey();
-        final OkCoinAuthSigner signer = new OkCoinAuthSigner(apiKey, secretKey);
-        final Map<String, String> nameValueMap = new HashMap<>();
-        final String sign = signer.digestParams(nameValueMap);
+        public Observable<PrivateData> getTradesObservable() {
+            final String apiKey = exchange.getExchangeSpecification().getApiKey();
+            final String secretKey = exchange.getExchangeSpecification().getSecretKey();
+            final OkCoinAuthSigner signer = new OkCoinAuthSigner(apiKey, secretKey);
+            final Map<String, String> nameValueMap = new HashMap<>();
+            final String sign = signer.digestParams(nameValueMap);
 
-        return service.subscribeChannel("ok_sub_futureusd_trades",
-                apiKey,
-                sign)
-                .observeOn(Schedulers.computation())
-                .map(jsonNode -> parseResult(jsonNode, "btc"));
-    }
+            return service.subscribeChannel("ok_sub_futureusd_trades",
+                    apiKey,
+                    sign)
+                    .observeOn(Schedulers.computation())
+                    .map(jsonNode -> parseResult(jsonNode, "btc", ""));
+        }
 
-    public Observable<PrivateData> getPositionObservable() {
-        final String apiKey = exchange.getExchangeSpecification().getApiKey();
-        final String secretKey = exchange.getExchangeSpecification().getSecretKey();
-        final OkCoinAuthSigner signer = new OkCoinAuthSigner(apiKey, secretKey);
-        final Map<String, String> nameValueMap = new HashMap<>();
-        final String sign = signer.digestParams(nameValueMap);
+        public Observable<PrivateData> getPositionObservable() {
+            final String apiKey = exchange.getExchangeSpecification().getApiKey();
+            final String secretKey = exchange.getExchangeSpecification().getSecretKey();
+            final OkCoinAuthSigner signer = new OkCoinAuthSigner(apiKey, secretKey);
+            final Map<String, String> nameValueMap = new HashMap<>();
+            final String sign = signer.digestParams(nameValueMap);
 
-        return service.subscribeChannel("ok_sub_futureusd_positions",
-                apiKey,
-                sign)
-                .observeOn(Schedulers.computation())
-                .map(jsonNode -> parseResult(jsonNode, "btc"));
-    }
-
-    PrivateData parseResult(JsonNode jsonNode, String mainToolName) {
+            return service.subscribeChannel("ok_sub_futureusd_positions",
+                    apiKey,
+                    sign)
+                    .observeOn(Schedulers.computation())
+                    .map(jsonNode -> parseResult(jsonNode, "btc", ""));
+        }
+    */
+    PrivateData parseResult(JsonNode jsonNode, String mainToolName, String contractName) {
         List<LimitOrder> trades = new ArrayList<>();
         AccountInfoContracts accountInfo = null;
         Position positionInfo = null;
@@ -120,7 +117,7 @@ public class OkExStreamingPrivateDataService implements StreamingPrivateDataServ
             if (channel != null) {
                 final JsonNode dataNode = jsonNode.get("data");
 
-                logger.debug("PrivateData:" + channel.asText() + ":" + dataNode.toString());
+                logger.info("PrivateData:" + channel.asText() + ":" + dataNode.toString());
                 if (dataNode.get("result") != null && !dataNode.get("result").asBoolean()) {
                     logger.error("PrivateData:" + channel.asText() + ":" + dataNode.toString());
                     // empty answer.
@@ -130,8 +127,11 @@ public class OkExStreamingPrivateDataService implements StreamingPrivateDataServ
                     switch (channel.asText()) {
                         case "ok_sub_futureusd_trades":
                             final OkExTradeResult okExTradeResult = mapper.treeToValue(dataNode, OkExTradeResult.class);
-                            final LimitOrder limitOrder = OkExAdapters.adaptTradeResult(okExTradeResult);
-                            trades.add(limitOrder);
+                            if (okExTradeResult != null // contract_name == "BTC0907", contract_type="next_week"
+                                    && (contractName.isEmpty() || okExTradeResult.getContractName().equals(contractName))) {
+                                final LimitOrder limitOrder = OkExAdapters.adaptTradeResult(okExTradeResult);
+                                trades.add(limitOrder);
+                            }
                             break;
                         case "ok_futureusd_userinfo":
                             final JsonNode btcNode = dataNode.get("info").get(mainToolName);
@@ -142,15 +142,19 @@ public class OkExStreamingPrivateDataService implements StreamingPrivateDataServ
                                     margin, BigDecimal.ZERO, profitReal, BigDecimal.ZERO);
                             break;
                         case "ok_sub_futureusd_userinfo":
-                            final BigDecimal subWallet = new BigDecimal(dataNode.get("balance").asText());
-                            final BigDecimal subProfitReal = new BigDecimal(dataNode.get("profit_real").asText());
-                            final BigDecimal subMargin = new BigDecimal(dataNode.get("keep_deposit").asText());
-                            accountInfo = new AccountInfoContracts(subWallet, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO,
-                                    subMargin, BigDecimal.ZERO, subProfitReal, BigDecimal.ZERO);
+                            // dataNode.get("symbol").asText() = "btc_usd";  mainToolName="btc"/"eth"
+                            if (dataNode.get("symbol").asText().startsWith(mainToolName)) {
+                                final BigDecimal subWallet = new BigDecimal(dataNode.get("balance").asText());
+                                final BigDecimal subProfitReal = new BigDecimal(dataNode.get("profit_real").asText());
+                                final BigDecimal subMargin = new BigDecimal(dataNode.get("keep_deposit").asText());
+                                accountInfo = new AccountInfoContracts(subWallet, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO,
+                                        BigDecimal.ZERO,
+                                        subMargin, BigDecimal.ZERO, subProfitReal, BigDecimal.ZERO);
+                            }
                             break;
                         case "ok_sub_futureusd_positions":
                             final JsonNode positionsNode = dataNode.get("positions");
-                            positionInfo = adaptPosition(positionsNode);
+                            positionInfo = adaptPosition(positionsNode, contractName);
                             break;
                         default:
                             System.out.println("WARNING unknown response channel: " + channel.asText());
@@ -164,22 +168,29 @@ public class OkExStreamingPrivateDataService implements StreamingPrivateDataServ
         return new PrivateData(trades, accountInfo, positionInfo);
     }
 
-    private Position adaptPosition(JsonNode positionsNode) {
+    private Position adaptPosition(JsonNode positionsNode, String contractName) {
         BigDecimal positionLong = BigDecimal.ZERO;
         BigDecimal positionShort = BigDecimal.ZERO;
-        for (JsonNode node : positionsNode) {
-            final String holdAmountInContracts = node.get("hold_amount").asText();
+        boolean hasInfo = false;
+
+        for (JsonNode node : positionsNode) { // contract_name = "BTC0907"
+            if (contractName.isEmpty() || node.get("contract_name").asText().equals(contractName)) {
+                hasInfo = true;
+                final String holdAmountInContracts = node.get("hold_amount").asText();
 //            final String available = node.get("eveningup").asText();
 //            final String bondfreez = node.get("bondfreez").asText();
-            final String position = node.get("position").asText();
-            if (position.equals("1")) { // long - buy - bid
-                positionLong = new BigDecimal(holdAmountInContracts);
-            } else if (position.equals("2")) { // short - sell - ask
-                positionShort = new BigDecimal(holdAmountInContracts);
+                final String position = node.get("position").asText();
+                if (position.equals("1")) { // long - buy - bid
+                    positionLong = new BigDecimal(holdAmountInContracts);
+                } else if (position.equals("2")) { // short - sell - ask
+                    positionShort = new BigDecimal(holdAmountInContracts);
+                }
             }
         }
 
-        return new Position(positionLong, positionShort, BigDecimal.ZERO, BigDecimal.ZERO, positionsNode.toString());
+        return hasInfo
+                ? new Position(positionLong, positionShort, BigDecimal.ZERO, BigDecimal.ZERO, positionsNode.toString())
+                : null;
     }
 
 }

@@ -13,5 +13,5 @@ public interface StreamingPrivateDataService {
      * Emits private data on subscription.
      * @param mainToolName
      */
-    Observable<PrivateData> getAllPrivateDataObservable(String mainToolName);
+    Observable<PrivateData> getAllPrivateDataObservable(String mainToolName, String contractName);
 }

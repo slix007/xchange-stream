@@ -39,7 +39,7 @@ public class OkCoinStreamingPrivateDataService implements StreamingPrivateDataSe
     }
 
     @Override
-    public Observable<PrivateData> getAllPrivateDataObservable(String mainToolName) {
+    public Observable<PrivateData> getAllPrivateDataObservable(String mainToolName, String contractName) {
         final String apiKey = exchange.getExchangeSpecification().getApiKey();
         final String secretKey = exchange.getExchangeSpecification().getSecretKey();
         final OkCoinAuthSigner signer = new OkCoinAuthSigner(apiKey, secretKey);
