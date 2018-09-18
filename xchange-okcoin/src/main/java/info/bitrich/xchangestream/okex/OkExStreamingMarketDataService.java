@@ -69,9 +69,17 @@ public class OkExStreamingMarketDataService implements StreamingMarketDataServic
 
     @Override
     public Observable<Ticker> getTicker(CurrencyPair currencyPair, Object... args) {
-        final String futuresContractName = ((FuturesContract) args[0]).getName();
-        final Tool tool = Tool.valueOf(currencyPair.base.getCurrencyCode());
-        final String channel = String.format("ok_sub_futureusd_%s_ticker_%s", tool.getName(), futuresContractName);
+        final String channel;
+        if (args.length == 1) {
+            final String futuresContractName = ((FuturesContract) args[0]).getName();
+            final Tool tool = Tool.valueOf(currencyPair.base.getCurrencyCode());
+            channel = String.format("ok_sub_futureusd_%s_ticker_%s", tool.getName(), futuresContractName);
+        } else if (args.length == 2 && args[1].equals("eth_btc")) {
+            channel = "ok_sub_spot_eth_btc_ticker";
+        } else {
+            throw new IllegalArgumentException("Illegal args request for Ticker");
+        }
+
         return service.subscribeChannel(channel)
                 .map(s -> {
                     ObjectMapper mapper = new ObjectMapper();
@@ -80,13 +88,15 @@ public class OkExStreamingMarketDataService implements StreamingMarketDataServic
 
                     final TickerJson tickerJson = mapper.treeToValue(s.get("data"), TickerJson.class);
 
+                    BigDecimal high = tickerJson.getLimitHigh() != null ? new BigDecimal(tickerJson.getLimitHigh()) : BigDecimal.ZERO;
+                    BigDecimal low = tickerJson.getLimitLow() != null ? new BigDecimal(tickerJson.getLimitLow()) : BigDecimal.ZERO;
                     return new Ticker.Builder()
                             .currencyPair(currencyPair)
                             .last(tickerJson.getLast())
                             .bid(tickerJson.getBuy())
                             .ask(tickerJson.getSell())
-                            .high(new BigDecimal(tickerJson.getLimitHigh()))
-                            .low(new BigDecimal(tickerJson.getLimitLow()))
+                            .high(high)
+                            .low(low)
                             .volume(tickerJson.getVol())
                             .timestamp(new Date())
                             .build();
