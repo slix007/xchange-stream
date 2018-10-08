@@ -117,7 +117,7 @@ public class OkExStreamingPrivateDataService implements StreamingPrivateDataServ
             if (channel != null) {
                 final JsonNode dataNode = jsonNode.get("data");
 
-                logger.info("PrivateData:" + channel.asText() + ":" + dataNode.toString());
+                logger.debug("PrivateData:" + channel.asText() + ":" + dataNode.toString());
                 if (dataNode.get("result") != null && !dataNode.get("result").asBoolean()) {
                     logger.error("PrivateData:" + channel.asText() + ":" + dataNode.toString());
                     // empty answer.
