@@ -1,19 +1,6 @@
 package info.bitrich.xchangestream.service.netty;
 
 import info.bitrich.xchangestream.service.exception.NotConnectedException;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
-
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -39,6 +26,16 @@ import io.netty.handler.ssl.SslContextBuilder;
 import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class NettyStreamingService<T> {
     private static final Logger LOG = LoggerFactory.getLogger(NettyStreamingService.class);
@@ -62,7 +59,7 @@ public abstract class NettyStreamingService<T> {
     public Completable connect(long heartbeatInterval, TimeUnit heartbeatTimeUnit) {
         return Completable.create(completable -> {
             try {
-                LOG.info("Connecting to {}://{}:{}{}", uri.getScheme(), uri.getHost(), uri.getPort(), uri.getPath());
+                LOG.info("Connecting to {}", uri.toString());
                 String scheme = uri.getScheme() == null ? "ws" : uri.getScheme();
 
                 String host = uri.getHost();
@@ -293,7 +290,7 @@ public abstract class NettyStreamingService<T> {
         emitter.onError(t);
     }
 
-    protected WebSocketClientExtensionHandler getWebSocketClientExtensionHandler(){
+    protected WebSocketClientExtensionHandler getWebSocketClientExtensionHandler() {
         return WebSocketClientCompressionHandler.INSTANCE;
     }
 

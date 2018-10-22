@@ -1,10 +1,23 @@
 package info.bitrich.xchangestream.service.netty;
 
 
-import io.netty.channel.*;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufInputStream;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelPromise;
+import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.FullHttpResponse;
-import io.netty.handler.codec.http.websocketx.*;
+import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
+import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
+import io.netty.handler.codec.http.websocketx.PongWebSocketFrame;
+import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
+import io.netty.handler.codec.http.websocketx.WebSocketClientHandshaker;
+import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.netty.util.CharsetUtil;
+import java.nio.charset.StandardCharsets;
+import java.util.zip.Inflater;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,6 +77,10 @@ public class WebSocketClientHandler extends SimpleChannelInboundHandler<Object> 
         if (frame instanceof TextWebSocketFrame) {
             TextWebSocketFrame textFrame = (TextWebSocketFrame) frame;
             handler.onMessage(textFrame.text());
+        } else if (frame instanceof BinaryWebSocketFrame) {
+            BinaryWebSocketFrame binaryFrame = (BinaryWebSocketFrame) frame;
+            String text = uncompress(binaryFrame.content());
+            handler.onMessage(text);
         } else if (frame instanceof PongWebSocketFrame) {
             LOG.debug("WebSocket Client received pong");
         } else if (frame instanceof CloseWebSocketFrame) {
@@ -79,5 +96,27 @@ public class WebSocketClientHandler extends SimpleChannelInboundHandler<Object> 
             handshakeFuture.setFailure(cause);
         }
         ctx.close();
+    }
+
+    private String uncompress(ByteBuf byteBuf) {
+        byte[] temp = new byte[byteBuf.readableBytes()];
+        ByteBufInputStream bis = new ByteBufInputStream(byteBuf);
+        StringBuilder appender = new StringBuilder();
+        try {
+            //noinspection ResultOfMethodCallIgnored
+            bis.read(temp);
+            bis.close();
+            Inflater infl = new Inflater(true);
+            infl.setInput(temp, 0, temp.length);
+            byte[] result = new byte[1024];
+            while (!infl.finished()) {
+                int length = infl.inflate(result);
+                appender.append(new String(result, 0, length, StandardCharsets.UTF_8));
+            }
+            infl.end();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return appender.toString();
     }
 }
