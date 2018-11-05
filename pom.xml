@@ -46,7 +46,7 @@
         <connection>scm:git:git@github.com:slix007/xchange-stream.git</connection>
         <developerConnection>scm:git:git@github.com:slix007/xchange-stream.git</developerConnection>
         <url>git@github.com:slix007/xchange-stream.git</url>
-        <tag>HEAD</tag>
+        <tag>v4.2.3-bts</tag>
     </scm>
 
     <distributionManagement>
