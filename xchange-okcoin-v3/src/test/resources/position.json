@@ -1,0 +1,22 @@
+{
+  "table": "futures/position",
+  "data": [
+    {
+      "long_qty": "0",
+      "long_avail_qty": "0",
+      "long_avg_cost": "3869.42",
+      "long_settlement_price": "3869.42",
+      "realised_pnl": "-0.00005244",
+      "short_qty": "0",
+      "short_avail_qty": "0",
+      "short_avg_cost": "3868.56",
+      "short_settlement_price": "3868.56",
+      "liquidation_price": "0.0",
+      "instrument_id": "BTC-USD-190322",
+      "leverage": "20",
+      "created_at": "2019-03-15T10:59:51.000Z",
+      "updated_at": "2019-03-16T06:02:24.000Z",
+      "margin_mode": "crossed"
+    }
+  ]
+}
