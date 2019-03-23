@@ -28,6 +28,8 @@ public class OkExStreamingPrivateDataServiceMockTest {
     private OkCoinStreamingService streamingService;
     @Mock
     private OkExStreamingExchange exchange;
+    @Mock
+    private InstrumentDto instrumentDto;
     private OkExStreamingPrivateDataService dataService;
 
     @Before
@@ -52,7 +54,8 @@ public class OkExStreamingPrivateDataServiceMockTest {
 //        Date createdAt = Date.from(Instant.parse("2019-03-15T10:59:51.000Z"));
 
         // Call get order book observable
-        final InstrumentDto instrumentDto = new InstrumentDto(CurrencyPair.BTC_USD, FuturesContract.ThisWeek);
+//        final InstrumentDto instrumentDto = new InstrumentDto(CurrencyPair.BTC_USD, FuturesContract.ThisWeek);
+        when(instrumentDto.getInstrumentId()).thenReturn("BTC-USD-190322");
         TestObserver<Position> test = dataService.getPositionObservable(instrumentDto).test();
 
         test.awaitTerminalEvent();
