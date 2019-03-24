@@ -6,6 +6,7 @@ import info.bitrich.xchangestream.core.StreamingExchangeEx;
 import info.bitrich.xchangestream.core.StreamingMarketDataService;
 import info.bitrich.xchangestream.core.StreamingPrivateDataService;
 import info.bitrich.xchangestream.core.StreamingTradingService;
+import info.bitrich.xchangestream.service.ws.statistic.PingStatEvent;
 import io.reactivex.Completable;
 import io.reactivex.Observable;
 import org.apache.commons.lang3.StringUtils;
@@ -101,4 +102,9 @@ public class OkCoinStreamingExchange extends OkCoinExchange implements Streaming
     public void useCompressedMessages(boolean compressedMessages) {
         // always true
     }
+
+    public Observable<PingStatEvent> subscribePingStats() {
+        return streamingService.subscribePingStats();
+    }
+
 }

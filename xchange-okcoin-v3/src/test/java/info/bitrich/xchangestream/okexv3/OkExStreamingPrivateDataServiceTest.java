@@ -2,6 +2,7 @@ package info.bitrich.xchangestream.okexv3;
 
 import info.bitrich.xchangestream.core.StreamingExchangeFactory;
 import info.bitrich.xchangestream.okexv3.dto.InstrumentDto;
+import info.bitrich.xchangestream.service.ws.statistic.PingStatEvent;
 import io.reactivex.disposables.Disposable;
 import java.util.concurrent.TimeUnit;
 import org.junit.Before;
@@ -51,6 +52,10 @@ public class OkExStreamingPrivateDataServiceTest {
                 .subscribe();
         exchange.onDisconnect()
                 .doOnEvent(System.out::println)
+                .subscribe();
+        exchange.subscribePingStats()
+                .map(PingStatEvent::getPingPongMs)
+                .doOnNext(System.out::println)
                 .subscribe();
 
         final boolean loginSuccess = exchange.getStreamingPrivateDataService()

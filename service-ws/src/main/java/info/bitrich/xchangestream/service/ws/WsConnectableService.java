@@ -3,6 +3,7 @@ package info.bitrich.xchangestream.service.ws;
 import info.bitrich.xchangestream.service.ConnectableService;
 import info.bitrich.xchangestream.service.netty.RetryWithDelay;
 import info.bitrich.xchangestream.service.ws.pipeline.SocketChannelChannelInitializer;
+import info.bitrich.xchangestream.service.ws.statistic.PingStatEvent;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -49,7 +50,6 @@ public abstract class WsConnectableService extends ConnectableService {
 
     private final int maxFramePayloadLength;
     private final URI uri;
-    //    private boolean isManualDisconnect = false;
     private boolean connectedSuccessfully = false;
     private Channel webSocketChannel;
     private Duration retryDuration;
@@ -60,6 +60,7 @@ public abstract class WsConnectableService extends ConnectableService {
     private final List<ObservableEmitter<Throwable>> reconnFailEmitters = new LinkedList<>();
     private final List<ObservableEmitter<Object>> connectionSuccessEmitters = new LinkedList<>();
     private CompletableEmitter onDisconnectEmitter;
+    private final List<ObservableEmitter<PingStatEvent>> pingStatEmitters = new LinkedList<>();
 
     private final WsConnectionSpec wsConnectionSpec = new WsConnectionSpec();
 
@@ -173,6 +174,10 @@ public abstract class WsConnectableService extends ConnectableService {
                 if (handshakeEmitter != null && evt == ClientHandshakeStateEvent.HANDSHAKE_COMPLETE) {
                     handshakeEmitter.onComplete();
                 }
+                if (evt instanceof PingStatEvent) {
+                    final PingStatEvent pingStatEvent = (PingStatEvent) evt;
+                    pingStatEmitters.forEach(emitter -> emitter.onNext(pingStatEvent));
+                }
                 super.userEventTriggered(ctx, evt);
             }
 
@@ -252,7 +257,6 @@ public abstract class WsConnectableService extends ConnectableService {
 
 
     public Completable disconnect() {
-//        isManualDisconnect = true;
         connectedSuccessfully = false;
         return Completable.create(completable -> {
             if (isSocketOpen()) {
@@ -313,26 +317,9 @@ public abstract class WsConnectableService extends ConnectableService {
         return Observable.create(connectionSuccessEmitters::add);
     }
 
-//    protected class NettyWebSocketClientHandler extends WebSocketClientHandler {
-//
-//        protected NettyWebSocketClientHandler(WebSocketClientHandshaker handshaker, WebSocketMessageHandler handler) {
-//            super(handshaker, handler);
-//        }
-//
-//        @Override
-//        public void channelInactive(ChannelHandlerContext ctx) {
-//            if (isManualDisconnect) {
-//                isManualDisconnect = false;
-//            } else {
-//                super.channelInactive(ctx);
-//                if (connectedSuccessfully) {
-//                    log.info("Reopening websocket because it was closed by the host");
-//                    eventLoopGroup.shutdownGracefully(2, 30, TimeUnit.SECONDS).addListener(f -> connect().subscribe());
-//                }
-//            }
-//        }
-//
-//    }
+    public Observable<PingStatEvent> subscribePingStats() {
+        return Observable.create(pingStatEmitters::add);
+    }
 
     public boolean isSocketClosed() {
         return webSocketChannel == null || !webSocketChannel.isOpen();
@@ -341,10 +328,6 @@ public abstract class WsConnectableService extends ConnectableService {
     public boolean isSocketOpen() {
         return webSocketChannel != null && webSocketChannel.isOpen();
     }
-
-//    public boolean isManualDisconnect() {
-//        return isManualDisconnect;
-//    }
 
     public boolean isConnectedSuccessfully() {
         return connectedSuccessfully;
