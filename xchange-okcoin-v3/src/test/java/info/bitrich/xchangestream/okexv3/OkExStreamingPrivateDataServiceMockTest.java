@@ -16,8 +16,6 @@ import java.math.BigDecimal;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.knowm.xchange.currency.CurrencyPair;
-import org.knowm.xchange.okcoin.FuturesContract;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 

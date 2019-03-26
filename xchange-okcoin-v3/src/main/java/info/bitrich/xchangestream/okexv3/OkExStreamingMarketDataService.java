@@ -88,13 +88,13 @@ public class OkExStreamingMarketDataService implements StreamingMarketDataServic
                 .share();
     }
 
-    public Observable<OrderBook> getOrderBooks(List<InstrumentDto> instruments, boolean isDepth5) {
+    public Observable<OkCoinDepth> getOrderBooks(List<InstrumentDto> instruments, boolean isDepth5) {
         List<String> channelNames = new ArrayList<>();
-        Map<String, CurrencyPair> instrumentIdToCurrencyPair = new HashMap<>();
+//        Map<String, CurrencyPair> instrumentIdToCurrencyPair = new HashMap<>();
         for (InstrumentDto instrument : instruments) {
-            final CurrencyPair currencyPair = instrument.getCurrencyPair();
+//            final CurrencyPair currencyPair = instrument.getCurrencyPair();
             final String instrumentId = instrument.getInstrumentId();
-            instrumentIdToCurrencyPair.put(instrumentId, currencyPair);
+//            instrumentIdToCurrencyPair.put(instrumentId, currencyPair);
             final String channelName = isDepth5
                     ? "futures/depth5:" + instrumentId
                     : "futures/depth:" + instrumentId;
@@ -108,20 +108,21 @@ public class OkExStreamingMarketDataService implements StreamingMarketDataServic
                 .filter(Objects::nonNull)
                 .flatMap(Observable::fromIterable)
                 .map(dataNode -> objectMapper.treeToValue(dataNode, OkCoinDepth.class))
-                .map(d -> {
-                    final CurrencyPair currencyPair = instrumentIdToCurrencyPair.get(d.getInstrumentId());
-                    return OkExAdapters.adaptOrderBook(d, currencyPair);
-                }).share();
+//                .map(d -> {
+//                    final CurrencyPair currencyPair = instrumentIdToCurrencyPair.get(d.getInstrumentId());
+//                    return OkExAdapters.adaptOrderBook(d, currencyPair);
+//                })
+                .share();
     }
 
     @SuppressWarnings("Duplicates")
-    public Observable<Ticker> getTickers(List<InstrumentDto> instruments) {
+    public Observable<OkcoinTicker> getTickers(List<InstrumentDto> instruments) {
         List<String> channelNames = new ArrayList<>();
-        Map<String, CurrencyPair> instrumentIdToCurrencyPair = new HashMap<>();
+//        Map<String, CurrencyPair> instrumentIdToCurrencyPair = new HashMap<>();
         for (InstrumentDto instrument : instruments) {
             final CurrencyPair currencyPair = instrument.getCurrencyPair();
             final String instrumentId = instrument.getInstrumentId();
-            instrumentIdToCurrencyPair.put(instrumentId, currencyPair);
+//            instrumentIdToCurrencyPair.put(instrumentId, currencyPair);
 
             final String channelName = "futures/ticker:" + instrumentId;
             channelNames.add(channelName);
@@ -132,10 +133,11 @@ public class OkExStreamingMarketDataService implements StreamingMarketDataServic
                 .filter(Objects::nonNull)
                 .flatMap(Observable::fromIterable)
                 .map(dataNode -> objectMapper.treeToValue(dataNode, OkcoinTicker.class))
-                .map(okCoinTicker -> {
-                    final CurrencyPair currencyPair = instrumentIdToCurrencyPair.get(okCoinTicker.getInstrumentId());
-                    return OkExAdapters.adaptTicker(okCoinTicker, currencyPair);
-                }).share();
+//                .map(okCoinTicker -> {
+//                    final CurrencyPair currencyPair = instrumentIdToCurrencyPair.get(okCoinTicker.getInstrumentId());
+//                    return OkExAdapters.adaptTicker(okCoinTicker, currencyPair);
+//                })
+                .share();
     }
 
     public Observable<OkcoinMarkPrice> getMarkPrices(List<InstrumentDto> instruments) {
@@ -173,7 +175,8 @@ public class OkExStreamingMarketDataService implements StreamingMarketDataServic
                 .map(okCoinTicker -> {
                     final CurrencyPair currencyPair = instrumentIdToCurrencyPair.get(okCoinTicker.getInstrumentId());
                     return OkExAdapters.adaptTicker(okCoinTicker, currencyPair);
-                }).share();
+                })
+                .share();
     }
 
     @Override

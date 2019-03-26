@@ -24,13 +24,15 @@ public class OkExDoubleInstrumentsManualExample {
 
         final List<InstrumentDto> instrumentDtos = Arrays.asList(
                 new InstrumentDto(CurrencyPair.BTC_USD, FuturesContract.ThisWeek),
-                new InstrumentDto(CurrencyPair.ETH_USD, FuturesContract.Quarter)
+//                new InstrumentDto(CurrencyPair.ETH_USD, FuturesContract.Quarter)
+                new InstrumentDto(CurrencyPair.BTC_USD, FuturesContract.Quarter)
         );
 
         final Disposable subscribe = ((OkExStreamingMarketDataService) exchange.getStreamingMarketDataService())
                 .getOrderBooks(instrumentDtos, true).subscribe(orderBook -> {
-                    LOG.info("First ask: {}", orderBook.getAsks().get(0));
-                    LOG.info("First bid: {}", orderBook.getBids().get(0));
+//                    LOG.info(orderBook.toString());
+//                    LOG.info("First ask: {}", orderBook.getAsks().get(0));
+//                    LOG.info("First bid: {}", orderBook.getBids().get(0));
                 }, throwable -> LOG.error("ERROR in getting order book: ", throwable));
 
 //        final Disposable subscribe = ((OkExStreamingMarketDataService) exchange.getStreamingMarketDataService())
