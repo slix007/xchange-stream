@@ -82,8 +82,8 @@ public class OkExAdapters {
 
     public static Ticker adaptTicker(OkcoinTicker okCoinTicker, CurrencyPair currencyPair) {
         return (new Ticker.Builder()).currencyPair(currencyPair)
-                .high(okCoinTicker.getHight24h())
-                .low(okCoinTicker.getLow24h())
+                .high(null)
+                .low(null)
                 .bid(okCoinTicker.getBestBid())
                 .ask(okCoinTicker.getBestAsk())
                 .last(okCoinTicker.getLast())

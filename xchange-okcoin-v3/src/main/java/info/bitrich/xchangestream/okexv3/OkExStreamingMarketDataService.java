@@ -6,6 +6,7 @@ import info.bitrich.xchangestream.core.helper.WsObjectMapperHelper;
 import info.bitrich.xchangestream.okexv3.dto.InstrumentDto;
 import info.bitrich.xchangestream.okexv3.dto.marketdata.OkCoinDepth;
 import info.bitrich.xchangestream.okexv3.dto.marketdata.OkcoinMarkPrice;
+import info.bitrich.xchangestream.okexv3.dto.marketdata.OkcoinPriceRange;
 import info.bitrich.xchangestream.okexv3.dto.marketdata.OkcoinTicker;
 import io.reactivex.Observable;
 import java.util.ArrayList;
@@ -87,6 +88,18 @@ public class OkExStreamingMarketDataService implements StreamingMarketDataServic
                 .map(okCoinTicker -> OkExAdapters.adaptTicker(okCoinTicker, currencyPair))
                 .share();
     }
+
+    public Observable<OkcoinPriceRange> getPriceRange(InstrumentDto instrumentDto) {
+        final String instrumentId = instrumentDto.getInstrumentId();
+        final String channelName = "futures/price_range:" + instrumentId;
+        return service.subscribeChannel(channelName)
+                .map(s -> s.get("data"))
+                .filter(Objects::nonNull)
+                .flatMap(Observable::fromIterable)
+                .map(dataNode -> objectMapper.treeToValue(dataNode, OkcoinPriceRange.class))
+                .share();
+    }
+
 
     public Observable<OkCoinDepth> getOrderBooks(List<InstrumentDto> instruments, boolean isDepth5) {
         List<String> channelNames = new ArrayList<>();
