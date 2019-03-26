@@ -43,10 +43,8 @@ public abstract class WsToRxStreamingService<T> extends WsConnectableService imp
         log.warn("afterConnect: Resubscribing to the channels " + channels.keySet());
         if (channels.containsKey("login") && this.authSigner != null) {
             final Disposable disposable = doLogin(this.authSigner)
-                    .subscribe(() -> {
-                        loggedInSuccessfully = true;
-                        resubscribeToChannels();
-                    }, throwable -> log.error("login failed", throwable));
+                    .subscribe(this::resubscribeToChannels,
+                            throwable -> log.error("login failed", throwable));
         } else {
             loggedInSuccessfully = false;
             resubscribeToChannels();

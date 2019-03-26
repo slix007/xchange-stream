@@ -135,8 +135,12 @@ public class OkCoinStreamingService extends WsToRxStreamingService<JsonNode> {
         this.authSigner = authSigner;
         return subscribeChannel("login", authSigner)
                 .firstOrError()
-                .map(json -> json.get("success") != null && json.get("success").asBoolean())
+                .map(json -> json.get("success") != null
+                        && json.get("event") != null
+                        && json.get("event").asText().equals("login")
+                        && json.get("success").asBoolean())
                 .toCompletable()
+                .doOnError(e -> log.error("loginError", e))
                 .andThen(super.doLogin(authSigner));
     }
 

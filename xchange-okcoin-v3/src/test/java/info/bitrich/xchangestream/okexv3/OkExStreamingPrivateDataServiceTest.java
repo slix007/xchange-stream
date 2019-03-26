@@ -58,10 +58,10 @@ public class OkExStreamingPrivateDataServiceTest {
                 .doOnNext(System.out::println)
                 .subscribe();
 
-        final boolean loginSuccess = exchange.getStreamingPrivateDataService()
-                .login()
-                .blockingAwait(5, TimeUnit.SECONDS);
-        System.out.println("Login success=" + loginSuccess);
+//        final boolean loginSuccess = exchange.getStreamingPrivateDataService()
+//                .login()
+//                .blockingAwait(5, TimeUnit.SECONDS);
+//        System.out.println("Login success=" + loginSuccess);
 
         final Disposable subscribe = exchange.getStreamingPrivateDataService()
                 .getAccountInfoObservable(CurrencyPair.BTC_USD)
