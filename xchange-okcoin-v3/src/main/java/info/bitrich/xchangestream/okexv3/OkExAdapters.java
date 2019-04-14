@@ -145,9 +145,13 @@ public class OkExAdapters {
     }
 
     public static Position adaptPosition(OkExPosition okExPosition) {
+        final BigDecimal longAvailQty = okExPosition.getLongAvailQty();
+        final BigDecimal shortAvailQty = okExPosition.getShortAvailQty();
         return new Position(
                 okExPosition.getLongQty(),
                 okExPosition.getShortQty(),
+                longAvailQty != null ? longAvailQty : BigDecimal.ZERO,
+                shortAvailQty != null ? shortAvailQty : BigDecimal.ZERO,
                 okExPosition.getLeverage(),
                 okExPosition.getLiquidationPrice(),
                 BigDecimal.ZERO,

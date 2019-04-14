@@ -97,4 +97,19 @@ public class OkExStreamingPrivateDataService implements StreamingPrivateDataServ
                 : login().andThen(observable);
 
     }
+
+    // try workaround java.lang.NoSuchMethodError because of different XChange lib versions
+    public Observable<OkExUserOrder[]> getTradesObservableRaw(InstrumentDto instrumentDto) {
+        // {"op": "subscribe", "args": ["futures/order:BTC-USD-170317"]}
+        final String instrumentId = instrumentDto.getInstrumentId();
+        final String channelName = "futures/order:" + instrumentId;
+        final Observable<OkExUserOrder[]> observable = service.subscribeChannel(channelName)
+                .observeOn(Schedulers.computation())
+                .map(s -> s.get("data"))
+                .map(s -> objectMapper.treeToValue(s, OkExUserOrder[].class));
+
+        return service.isLoggedInSuccessfully()
+                ? observable
+                : login().andThen(observable);
+    }
 }

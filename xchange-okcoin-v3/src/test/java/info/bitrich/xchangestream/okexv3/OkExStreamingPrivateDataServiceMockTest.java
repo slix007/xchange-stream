@@ -65,6 +65,8 @@ public class OkExStreamingPrivateDataServiceMockTest {
         final Position expected = new Position(
                 BigDecimal.ZERO,
                 BigDecimal.ZERO,
+                BigDecimal.ZERO,
+                BigDecimal.ZERO,
                 BigDecimal.valueOf(20),
                 BigDecimal.valueOf(0.0),
                 BigDecimal.ZERO,
