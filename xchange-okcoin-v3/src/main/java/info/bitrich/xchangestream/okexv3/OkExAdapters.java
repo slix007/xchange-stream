@@ -111,7 +111,7 @@ public class OkExAdapters {
 
 //            final Date timestamp = Date.from(okExUserOrder.getTimestamp());
             final LimitOrder limitOrder = new LimitOrder(orderType,
-                    okExUserOrder.getContractVal(),
+                    okExUserOrder.getSize(),
                     currencyPair,
                     okExUserOrder.getOrderId(),
                     okExUserOrder.getTimestamp(),
