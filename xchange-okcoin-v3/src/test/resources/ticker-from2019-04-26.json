@@ -1,0 +1,15 @@
+{
+  "table": "futures/ticker",
+  "data": [
+    {
+      "last": "3702.2",
+      "best_bid": "3702.2",
+      "high_24h": "3807.66",
+      "low_24h": "3670.0",
+      "volume_24h": "2904871",
+      "best_ask": "3702.24",
+      "instrument_id": "BTC-USD-190329",
+      "timestamp": "2019-03-04T06:01:05.315Z"
+    }
+  ]
+}

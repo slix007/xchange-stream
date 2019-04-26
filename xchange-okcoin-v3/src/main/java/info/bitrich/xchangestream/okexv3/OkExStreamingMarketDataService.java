@@ -128,31 +128,6 @@ public class OkExStreamingMarketDataService implements StreamingMarketDataServic
                 .share();
     }
 
-    @SuppressWarnings("Duplicates")
-    public Observable<OkcoinTicker> getTickers(List<InstrumentDto> instruments) {
-        List<String> channelNames = new ArrayList<>();
-//        Map<String, CurrencyPair> instrumentIdToCurrencyPair = new HashMap<>();
-        for (InstrumentDto instrument : instruments) {
-            final CurrencyPair currencyPair = instrument.getCurrencyPair();
-            final String instrumentId = instrument.getInstrumentId();
-//            instrumentIdToCurrencyPair.put(instrumentId, currencyPair);
-
-            final String channelName = "futures/ticker:" + instrumentId;
-            channelNames.add(channelName);
-        }
-
-        return service.subscribeBatchChannels(channelNames)
-                .map(s -> s.get("data"))
-                .filter(Objects::nonNull)
-                .flatMap(Observable::fromIterable)
-                .map(dataNode -> objectMapper.treeToValue(dataNode, OkcoinTicker.class))
-//                .map(okCoinTicker -> {
-//                    final CurrencyPair currencyPair = instrumentIdToCurrencyPair.get(okCoinTicker.getInstrumentId());
-//                    return OkExAdapters.adaptTicker(okCoinTicker, currencyPair);
-//                })
-                .share();
-    }
-
     public Observable<OkcoinMarkPrice> getMarkPrices(List<InstrumentDto> instruments) {
         List<String> channelNames = new ArrayList<>();
         for (InstrumentDto instrument : instruments) {
