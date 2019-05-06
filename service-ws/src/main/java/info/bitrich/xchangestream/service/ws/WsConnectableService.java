@@ -59,7 +59,6 @@ public abstract class WsConnectableService extends ConnectableService {
 
     private final List<ObservableEmitter<Throwable>> reconnFailEmitters = new LinkedList<>();
     private final List<ObservableEmitter<Object>> connectionSuccessEmitters = new LinkedList<>();
-    private CompletableEmitter onDisconnectEmitter;
     private final List<ObservableEmitter<PingStatEvent>> pingStatEmitters = new LinkedList<>();
 
     private final WsConnectionSpec wsConnectionSpec = new WsConnectionSpec();
@@ -182,13 +181,6 @@ public abstract class WsConnectableService extends ConnectableService {
             }
 
             @Override
-            public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-                log.warn("channelInactive, ctx=" + ctx);
-                handleError(onDisconnectEmitter, new RuntimeException("channelInactive"));
-                super.channelInactive(ctx);
-            }
-
-            @Override
             public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
                 if (handshakeEmitter != null && !handshakeEmitter.isDisposed()) {
                     handshakeEmitter.onError(cause);
@@ -246,7 +238,11 @@ public abstract class WsConnectableService extends ConnectableService {
         eventLoopGroup.shutdownGracefully(2, 30, TimeUnit.SECONDS)
                 .addListener(future -> {
                     if (completable != null && !completable.isDisposed()) {
-                        completable.onError(t);
+                        if (t != null) {
+                            completable.onError(t);
+                        } else {
+                            completable.onComplete();
+                        }
                     }
                 });
     }
@@ -261,19 +257,11 @@ public abstract class WsConnectableService extends ConnectableService {
         return Completable.create(completable -> {
             if (isSocketOpen()) {
                 CloseWebSocketFrame closeFrame = new CloseWebSocketFrame();
-                webSocketChannel.writeAndFlush(closeFrame).addListener(future -> {
-                    eventLoopGroup.shutdownGracefully(2, 30, TimeUnit.SECONDS).addListener(f -> {
-                        log.info("Disconnected");
-                        completable.onComplete();
-                    });
-                });
+                webSocketChannel.writeAndFlush(closeFrame)
+                        .addListener(future -> shutdownEventLoopGroup(completable, null));
             } else {
                 log.warn("Disconnect called but already disconnected");
                 completable.onComplete();
-            }
-        }).doOnComplete(() -> {
-            if (onDisconnectEmitter != null && !onDisconnectEmitter.isDisposed()) {
-                onDisconnectEmitter.onComplete();
             }
         });
     }
@@ -286,7 +274,10 @@ public abstract class WsConnectableService extends ConnectableService {
 
     public Completable onDisconnect() {
         return Completable.create(completableEmitter -> {
-            this.onDisconnectEmitter = completableEmitter;
+            webSocketChannel.closeFuture().addListener(future -> {
+                log.warn("WebSocket close event");
+                completableEmitter.onComplete();
+            });
         }).onErrorComplete();
     }
 
