@@ -169,7 +169,9 @@ public abstract class WsConnectableService extends ConnectableService {
 
             @Override
             public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
-                log.info("evt=" + evt);
+                if (!(evt instanceof PingStatEvent)) {
+                    log.info("evt=" + evt);
+                }
                 if (handshakeEmitter != null && evt == ClientHandshakeStateEvent.HANDSHAKE_COMPLETE) {
                     handshakeEmitter.onComplete();
                 }
