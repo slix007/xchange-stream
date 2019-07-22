@@ -10,7 +10,7 @@ import org.knowm.xchange.exceptions.NotYetImplementedForExchangeException;
  * Created by Sergei Shurmin on 02.03.19.
  */
 public class OkExStreamingExchange extends OkCoinStreamingExchange {
-    protected static final String API_URI = "wss://real.okex.com:10442/ws/v3";
+    protected static final String API_URI = "wss://real.okex.com:8443/ws/v3";
 
     private OkExStreamingPrivateDataService streamingPrivateDataService;
 //    private OkExStreamingAcc streamingPrivateDataService;
