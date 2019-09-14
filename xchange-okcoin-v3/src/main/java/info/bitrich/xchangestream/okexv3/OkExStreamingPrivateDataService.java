@@ -3,7 +3,6 @@ package info.bitrich.xchangestream.okexv3;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import info.bitrich.xchangestream.core.StreamingPrivateDataService;
 import info.bitrich.xchangestream.core.dto.AccountInfoContracts;
-import info.bitrich.xchangestream.core.dto.Position;
 import info.bitrich.xchangestream.core.helper.WsObjectMapperHelper;
 import info.bitrich.xchangestream.okexv3.dto.InstrumentDto;
 import info.bitrich.xchangestream.okexv3.dto.OkCoinAuthSigner;
@@ -62,18 +61,18 @@ public class OkExStreamingPrivateDataService implements StreamingPrivateDataServ
     }
 
     @Override
-    public Observable<Position> getPositionObservable(InstrumentDto instrumentDto, Object... args) {
+    public Observable<OkExPosition> getPositionObservable(InstrumentDto instrumentDto, Object... args) {
         // {"op": "subscribe", "args": ["futures/position:BTC-USD-170317"]}
         final String instrumentId = instrumentDto.getInstrumentId();
         final String channelName = "futures/position:" + instrumentId;
-        final Observable<Position> observable = service.subscribeChannel(channelName)
+        final Observable<OkExPosition> observable = service.subscribeChannel(channelName)
                 .observeOn(Schedulers.computation())
 //                .doOnNext(System.out::println)
                 .map(s -> s.get("data"))
                 .flatMap(Observable::fromIterable)
 //                .doOnNext(System.out::println)
-                .map(s -> objectMapper.treeToValue(s, OkExPosition.class))
-                .map(OkExAdapters::adaptPosition);
+                .map(s -> objectMapper.treeToValue(s, OkExPosition.class));
+//                .map(OkExAdapters::adaptPosition);
 
         return service.isLoggedInSuccessfully()
                 ? observable

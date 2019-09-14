@@ -12,7 +12,9 @@ public class OkExPosition {
     private BigDecimal longMargin;
     private BigDecimal liquidationPrice; // actual
     private BigDecimal longLiquiPrice; // from doc
+    private BigDecimal longPnl;
     private BigDecimal longPnlRatio;
+    private BigDecimal longUnrealisedPnl;
     private BigDecimal longAvgCost;
     private BigDecimal longSettlementPrice;
     private BigDecimal realisedPnl;
@@ -20,7 +22,9 @@ public class OkExPosition {
     private BigDecimal shortAvailQty;
     private BigDecimal shortMargin;
     private BigDecimal shortLiquiPrice; // from doc
+    private BigDecimal shortPnl;
     private BigDecimal shortPnlRatio;
+    private BigDecimal shortUnrealisedPnl;
     private BigDecimal shortAvgCost;
     private BigDecimal shortSettlementPrice;
     private String instrumentId;
@@ -37,7 +41,9 @@ public class OkExPosition {
             @JsonProperty("long_margin") final BigDecimal longMargin,
             @JsonProperty("liquidation_price") final BigDecimal liquidationPrice,
             @JsonProperty("long_liqui_price") final BigDecimal longLiquiPrice,
+            @JsonProperty("long_pnl") final BigDecimal longPnl,
             @JsonProperty("long_pnl_ratio") final BigDecimal longPnlRatio,
+            @JsonProperty("long_unrealised_pnl") final BigDecimal longUnrealisedPnl,
             @JsonProperty("long_avg_cost") final BigDecimal longAvgCost,
             @JsonProperty("long_settlement_price") final BigDecimal longSettlementPrice,
             @JsonProperty("realised_pnl") final BigDecimal realisedPnl,
@@ -45,7 +51,9 @@ public class OkExPosition {
             @JsonProperty("short_avail_qty") final BigDecimal shortAvailQty,
             @JsonProperty("short_margin") final BigDecimal shortMargin,
             @JsonProperty("short_liqui_price") final BigDecimal shortLiquiPrice,
+            @JsonProperty("short_pnl") final BigDecimal shortPnl,
             @JsonProperty("short_pnl_ratio") final BigDecimal shortPnlRatio,
+            @JsonProperty("short_unrealised_pnl") final BigDecimal shortUnrealisedPnl,
             @JsonProperty("short_avg_cost") final BigDecimal shortAvgCost,
             @JsonProperty("short_settlement_price") final BigDecimal shortSettlementPrice,
             @JsonProperty("instrument_id") final String instrumentId,
@@ -61,7 +69,9 @@ public class OkExPosition {
         this.longMargin = longMargin;
         this.liquidationPrice = liquidationPrice;
         this.longLiquiPrice = longLiquiPrice;
+        this.longPnl = longPnl;
         this.longPnlRatio = longPnlRatio;
+        this.longUnrealisedPnl = longUnrealisedPnl;
         this.longAvgCost = longAvgCost;
         this.longSettlementPrice = longSettlementPrice;
         this.realisedPnl = realisedPnl;
@@ -69,7 +79,9 @@ public class OkExPosition {
         this.shortAvailQty = shortAvailQty;
         this.shortMargin = shortMargin;
         this.shortLiquiPrice = shortLiquiPrice;
+        this.shortPnl = shortPnl;
         this.shortPnlRatio = shortPnlRatio;
+        this.shortUnrealisedPnl = shortUnrealisedPnl;
         this.shortAvgCost = shortAvgCost;
         this.shortSettlementPrice = shortSettlementPrice;
         this.instrumentId = instrumentId;
@@ -101,8 +113,16 @@ public class OkExPosition {
         return longLiquiPrice;
     }
 
+    public BigDecimal getLongPnl() {
+        return longPnl;
+    }
+
     public BigDecimal getLongPnlRatio() {
         return longPnlRatio;
+    }
+
+    public BigDecimal getLongUnrealisedPnl() {
+        return longUnrealisedPnl;
     }
 
     public BigDecimal getLongAvgCost() {
@@ -133,8 +153,16 @@ public class OkExPosition {
         return shortLiquiPrice;
     }
 
+    public BigDecimal getShortPnl() {
+        return shortPnl;
+    }
+
     public BigDecimal getShortPnlRatio() {
         return shortPnlRatio;
+    }
+
+    public BigDecimal getShortUnrealisedPnl() {
+        return shortUnrealisedPnl;
     }
 
     public BigDecimal getShortAvgCost() {

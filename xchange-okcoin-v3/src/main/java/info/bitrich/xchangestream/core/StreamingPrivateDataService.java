@@ -1,8 +1,8 @@
 package info.bitrich.xchangestream.core;
 
 import info.bitrich.xchangestream.core.dto.AccountInfoContracts;
-import info.bitrich.xchangestream.core.dto.Position;
 import info.bitrich.xchangestream.okexv3.dto.InstrumentDto;
+import info.bitrich.xchangestream.okexv3.dto.privatedata.OkExPosition;
 import io.reactivex.Completable;
 import io.reactivex.Observable;
 import java.util.List;
@@ -20,7 +20,7 @@ public interface StreamingPrivateDataService {
 
     Observable<AccountInfoContracts> getAccountInfoObservable(CurrencyPair currencyPair, Object... args);
 
-    Observable<Position> getPositionObservable(InstrumentDto instrumentDto, Object... args);
+    Observable<OkExPosition> getPositionObservable(InstrumentDto instrumentDto, Object... args);
 
     Observable<List<LimitOrder>> getTradesObservable(InstrumentDto instrumentDto);
 
