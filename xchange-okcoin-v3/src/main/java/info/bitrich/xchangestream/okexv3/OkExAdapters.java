@@ -118,7 +118,7 @@ public class OkExAdapters {
                     okExUserOrder.getPrice(),
                     okExUserOrder.getPriceAvg(),
                     okExUserOrder.getFilledQty(),
-                    okExUserOrder.getFee(),
+//                    okExUserOrder.getFee(),
                     orderStatus);
             res.add(limitOrder);
         }

@@ -30,7 +30,7 @@ public class OkExStreamingMarketDataServiceTest {
 
         Assert.assertNotNull(orderBook);
         Assert.assertTrue(orderBook.getAsks().size() > 0);
-        Assert.assertTrue(orderBook.getAsks().get(0).getOriginalAmount().signum() > 0);
+        Assert.assertTrue(orderBook.getAsks().get(0).getTradableAmount().signum() > 0);
     }
 
     @Test

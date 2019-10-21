@@ -62,7 +62,7 @@ public class BookSanityChecker {
     }
 
     public static String hasErrors(LimitOrder limitOrder) {
-        if (limitOrder.getOriginalAmount().compareTo(BigDecimal.ZERO) <= 0) return
+        if (limitOrder.getTradableAmount().compareTo(BigDecimal.ZERO) <= 0) return
                 format("LimitOrder amount is <= 0 for %s", limitOrder);
         else return null;
     }

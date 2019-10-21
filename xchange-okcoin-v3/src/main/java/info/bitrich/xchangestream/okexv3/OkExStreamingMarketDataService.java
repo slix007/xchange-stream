@@ -18,6 +18,7 @@ import org.knowm.xchange.currency.CurrencyPair;
 import org.knowm.xchange.dto.marketdata.OrderBook;
 import org.knowm.xchange.dto.marketdata.Ticker;
 import org.knowm.xchange.dto.marketdata.Trade;
+import org.knowm.xchange.okcoin.FuturesContract;
 
 /**
  * Created by Sergei Shurmin on 02.03.19.
@@ -103,15 +104,20 @@ public class OkExStreamingMarketDataService implements StreamingMarketDataServic
 
     public Observable<OkCoinDepth> getOrderBooks(List<InstrumentDto> instruments, boolean isDepth5) {
         List<String> channelNames = new ArrayList<>();
-//        Map<String, CurrencyPair> instrumentIdToCurrencyPair = new HashMap<>();
         for (InstrumentDto instrument : instruments) {
-//            final CurrencyPair currencyPair = instrument.getCurrencyPair();
-            final String instrumentId = instrument.getInstrumentId();
-//            instrumentIdToCurrencyPair.put(instrumentId, currencyPair);
-            final String channelName = isDepth5
-                    ? "futures/depth5:" + instrumentId
-                    : "futures/depth:" + instrumentId;
-            channelNames.add(channelName);
+            if (instrument.getFuturesContract() == FuturesContract.Swap) {
+                if (isDepth5) {
+                    channelNames.add("swap/depth5:BTC-USD-SWAP");
+                } else {
+                    channelNames.add("swap/depth:BTC-USD-SWAP");
+                }
+            } else {
+                final String instrumentId = instrument.getInstrumentId();
+                final String channelName = isDepth5
+                        ? "futures/depth5:" + instrumentId
+                        : "futures/depth:" + instrumentId;
+                channelNames.add(channelName);
+            }
         }
         return this.service.subscribeBatchChannels(channelNames)
                 .filter(s -> s.get("table") != null)

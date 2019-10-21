@@ -44,8 +44,13 @@ public class InstrumentDto {
 
     /**
      * Examples: 190907, 190831
+     * or SWAP
      */
     private String getExpDate() {
+        if (futuresContract == FuturesContract.Swap) {
+            return "SWAP";
+        }
+
         final LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
         return getExpString(now, true);
     }
