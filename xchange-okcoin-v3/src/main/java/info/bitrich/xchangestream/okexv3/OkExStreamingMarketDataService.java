@@ -9,16 +9,17 @@ import info.bitrich.xchangestream.okexv3.dto.marketdata.OkcoinMarkPrice;
 import info.bitrich.xchangestream.okexv3.dto.marketdata.OkcoinPriceRange;
 import info.bitrich.xchangestream.okexv3.dto.marketdata.OkcoinTicker;
 import io.reactivex.Observable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 import org.knowm.xchange.currency.CurrencyPair;
 import org.knowm.xchange.dto.marketdata.OrderBook;
 import org.knowm.xchange.dto.marketdata.Ticker;
 import org.knowm.xchange.dto.marketdata.Trade;
 import org.knowm.xchange.okcoin.FuturesContract;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * Created by Sergei Shurmin on 02.03.19.
@@ -76,7 +77,9 @@ public class OkExStreamingMarketDataService implements StreamingMarketDataServic
         if (args.length == 1) {
             final InstrumentDto instrumentDto = (InstrumentDto) args[0];
             final String instrumentId = instrumentDto.getInstrumentId();
-            channelName = "futures/ticker:" + instrumentId;
+            channelName = instrumentDto.getFuturesContract() == FuturesContract.Swap
+                    ? "swap/ticker:" + instrumentId
+                    : "futures/ticker:" + instrumentId;
         } else { //if (args.length == 2) {
             final String instrument = (String) args[1];
             channelName = "spot/ticker:" + instrument;
@@ -92,7 +95,9 @@ public class OkExStreamingMarketDataService implements StreamingMarketDataServic
 
     public Observable<OkcoinPriceRange> getPriceRange(InstrumentDto instrumentDto) {
         final String instrumentId = instrumentDto.getInstrumentId();
-        final String channelName = "futures/price_range:" + instrumentId;
+        final String channelName = instrumentDto.getFuturesContract() == FuturesContract.Swap
+                ? "swap/price_range:" + instrumentId
+                : "futures/price_range:" + instrumentId;
         return service.subscribeChannel(channelName)
                 .map(s -> s.get("data"))
                 .filter(Objects::nonNull)
@@ -105,19 +110,18 @@ public class OkExStreamingMarketDataService implements StreamingMarketDataServic
     public Observable<OkCoinDepth> getOrderBooks(List<InstrumentDto> instruments, boolean isDepth5) {
         List<String> channelNames = new ArrayList<>();
         for (InstrumentDto instrument : instruments) {
+            final String channelName;
             if (instrument.getFuturesContract() == FuturesContract.Swap) {
-                if (isDepth5) {
-                    channelNames.add("swap/depth5:BTC-USD-SWAP");
-                } else {
-                    channelNames.add("swap/depth:BTC-USD-SWAP");
-                }
+                channelName = isDepth5
+                        ? "swap/depth5:" + instrument.getInstrumentId()
+                        : "swap/depth:" + instrument.getInstrumentId();
             } else {
                 final String instrumentId = instrument.getInstrumentId();
-                final String channelName = isDepth5
+                channelName = isDepth5
                         ? "futures/depth5:" + instrumentId
                         : "futures/depth:" + instrumentId;
-                channelNames.add(channelName);
             }
+            channelNames.add(channelName);
         }
         return this.service.subscribeBatchChannels(channelNames)
                 .filter(s -> s.get("table") != null)
@@ -138,7 +142,9 @@ public class OkExStreamingMarketDataService implements StreamingMarketDataServic
         List<String> channelNames = new ArrayList<>();
         for (InstrumentDto instrument : instruments) {
             final String instrumentId = instrument.getInstrumentId();
-            final String channelName = "futures/mark_price:" + instrumentId;
+            final String channelName = instrument.getFuturesContract() == FuturesContract.Swap
+                    ? "swap/mark_price:" + instrumentId
+                    : "futures/mark_price:" + instrumentId;
             channelNames.add(channelName);
         }
         return service.subscribeBatchChannels(channelNames)

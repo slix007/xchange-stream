@@ -12,12 +12,14 @@ import info.bitrich.xchangestream.okexv3.dto.privatedata.OkExUserOrder;
 import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.reactivex.schedulers.Schedulers;
-import java.util.List;
 import org.knowm.xchange.Exchange;
 import org.knowm.xchange.currency.CurrencyPair;
 import org.knowm.xchange.dto.trade.LimitOrder;
+import org.knowm.xchange.okcoin.FuturesContract;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.List;
 
 /**
  * Created by Sergey Shurmin on 6/18/17.
@@ -46,7 +48,10 @@ public class OkExStreamingPrivateDataService implements StreamingPrivateDataServ
     public Observable<AccountInfoContracts> getAccountInfoObservable(CurrencyPair currencyPair, Object... args) {
         // {"op": "subscribe", "args": ["futures/account:BTC"]}
         final String curr = currencyPair.base.toString().toUpperCase();
-        final String channelName = "futures/account:" + curr;
+        final InstrumentDto instrumentDto = (InstrumentDto) args[0];
+        final String channelName = instrumentDto != null && instrumentDto.getFuturesContract() == FuturesContract.Swap
+                ? "swap/account:" + instrumentDto.getInstrumentId()
+                : "futures/account:" + curr;
 
         final Observable<AccountInfoContracts> observable = service.subscribeChannel(channelName)
                 .observeOn(Schedulers.computation())
@@ -64,7 +69,9 @@ public class OkExStreamingPrivateDataService implements StreamingPrivateDataServ
     public Observable<OkExPosition> getPositionObservable(InstrumentDto instrumentDto, Object... args) {
         // {"op": "subscribe", "args": ["futures/position:BTC-USD-170317"]}
         final String instrumentId = instrumentDto.getInstrumentId();
-        final String channelName = "futures/position:" + instrumentId;
+        final String channelName = instrumentDto.getFuturesContract() == FuturesContract.Swap
+                ? "swap/position:" + instrumentId
+                : "futures/position:" + instrumentId;
         final Observable<OkExPosition> observable = service.subscribeChannel(channelName)
                 .observeOn(Schedulers.computation())
 //                .doOnNext(System.out::println)
@@ -83,7 +90,9 @@ public class OkExStreamingPrivateDataService implements StreamingPrivateDataServ
     public Observable<List<LimitOrder>> getTradesObservable(InstrumentDto instrumentDto) {
         // {"op": "subscribe", "args": ["futures/order:BTC-USD-170317"]}
         final String instrumentId = instrumentDto.getInstrumentId();
-        final String channelName = "futures/order:" + instrumentId;
+        final String channelName = instrumentDto.getFuturesContract() == FuturesContract.Swap
+                ? "swap/order:" + instrumentId
+                : "futures/order:" + instrumentId;
         final Observable<List<LimitOrder>> observable = service.subscribeChannel(channelName)
                 .observeOn(Schedulers.computation())
                 .map(s -> s.get("data"))
@@ -101,7 +110,9 @@ public class OkExStreamingPrivateDataService implements StreamingPrivateDataServ
     public Observable<OkExUserOrder[]> getTradesObservableRaw(InstrumentDto instrumentDto) {
         // {"op": "subscribe", "args": ["futures/order:BTC-USD-170317"]}
         final String instrumentId = instrumentDto.getInstrumentId();
-        final String channelName = "futures/order:" + instrumentId;
+        final String channelName = instrumentDto.getFuturesContract() == FuturesContract.Swap
+                ? "swap/order:" + instrumentId
+                : "futures/order:" + instrumentId;
         final Observable<OkExUserOrder[]> observable = service.subscribeChannel(channelName)
                 .observeOn(Schedulers.computation())
                 .map(s -> s.get("data"))
