@@ -48,7 +48,7 @@ public class OkExStreamingPrivateDataService implements StreamingPrivateDataServ
     public Observable<AccountInfoContracts> getAccountInfoObservable(CurrencyPair currencyPair, Object... args) {
         // {"op": "subscribe", "args": ["futures/account:BTC"]}
         final String curr = currencyPair.base.toString().toUpperCase();
-        final InstrumentDto instrumentDto = (InstrumentDto) args[0];
+        final InstrumentDto instrumentDto = args.length == 0 ? null : (InstrumentDto) args[0];
         final String channelName = instrumentDto != null && instrumentDto.getFuturesContract() == FuturesContract.Swap
                 ? "swap/account:" + instrumentDto.getInstrumentId()
                 : "futures/account:" + curr;
