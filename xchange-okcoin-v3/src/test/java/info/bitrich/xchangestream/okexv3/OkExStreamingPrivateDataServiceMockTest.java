@@ -1,25 +1,27 @@
 package info.bitrich.xchangestream.okexv3;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import info.bitrich.xchangestream.core.StreamingExchangeFactory;
-import info.bitrich.xchangestream.core.dto.Position;
+import info.bitrich.xchangestream.core.dto.PositionStream;
 import info.bitrich.xchangestream.okexv3.dto.InstrumentDto;
 import info.bitrich.xchangestream.okexv3.dto.privatedata.OkExPosition;
 import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.reactivex.observers.TestObserver;
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.util.Date;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.util.Date;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class OkExStreamingPrivateDataServiceMockTest {
@@ -58,7 +60,7 @@ public class OkExStreamingPrivateDataServiceMockTest {
         // Call get order book observable
 //        final InstrumentDto instrumentDto = new InstrumentDto(CurrencyPair.BTC_USD, FuturesContract.ThisWeek);
         when(instrumentDto.getInstrumentId()).thenReturn("BTC-USD-190322");
-        TestObserver<OkExPosition> test = dataService.getPositionObservable(instrumentDto).test();
+        TestObserver<PositionStream> test = dataService.getPositionObservable(instrumentDto).test();
 
         test.awaitTerminalEvent();
 
@@ -94,9 +96,25 @@ public class OkExStreamingPrivateDataServiceMockTest {
                 new Date(),
                 new Date(),
                 ""
-                );
+        );
 
-        test.assertResult(expected);
+        final PositionStream expected1 = new PositionStream(
+                BigDecimal.ZERO,
+                BigDecimal.ZERO,
+                BigDecimal.ZERO,
+                BigDecimal.ZERO,
+                BigDecimal.ZERO,
+                BigDecimal.ZERO,
+                BigDecimal.ZERO,
+                BigDecimal.ZERO,
+                BigDecimal.ZERO,
+                "",
+                Instant.now(),
+                "",
+                BigDecimal.ZERO
+        );
+
+        test.assertResult(expected1);
 
     }
 }

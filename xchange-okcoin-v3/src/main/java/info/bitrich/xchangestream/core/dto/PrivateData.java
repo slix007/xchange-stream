@@ -1,9 +1,11 @@
 package info.bitrich.xchangestream.core.dto;
 
+import org.knowm.xchange.dto.account.AccountInfo;
+import org.knowm.xchange.dto.account.AccountInfoContracts;
+import org.knowm.xchange.dto.trade.LimitOrder;
+
 import java.util.ArrayList;
 import java.util.List;
-import org.knowm.xchange.dto.account.AccountInfo;
-import org.knowm.xchange.dto.trade.LimitOrder;
 
 /**
  * Created by Sergey Shurmin on 6/10/17.
@@ -13,7 +15,7 @@ public class PrivateData {
     private List<LimitOrder> trades;
     private AccountInfo accountInfo;
     private AccountInfoContracts accountInfoContracts;
-    private Position positionInfo;
+    private PositionStream positionInfo;
     public boolean isOk = true;
 
     public PrivateData() {
@@ -26,7 +28,7 @@ public class PrivateData {
         this.accountInfo = accountInfo;
     }
 
-    public PrivateData(List<LimitOrder> trades, AccountInfoContracts accountInfoContracts, Position positionInfo) {
+    public PrivateData(List<LimitOrder> trades, AccountInfoContracts accountInfoContracts, PositionStream positionInfo) {
         this.trades = trades;
         this.accountInfoContracts = accountInfoContracts;
         this.positionInfo = positionInfo;
@@ -48,11 +50,11 @@ public class PrivateData {
         return accountInfo;
     }
 
-    public Position getPositionInfo() {
+    public PositionStream getPositionInfo() {
         return positionInfo;
     }
 
-    public void setPositionInfo(Position positionInfo) {
+    public void setPositionInfo(PositionStream positionInfo) {
         this.positionInfo = positionInfo;
     }
 

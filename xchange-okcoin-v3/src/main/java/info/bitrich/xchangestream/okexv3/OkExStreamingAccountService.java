@@ -1,24 +1,12 @@
 package info.bitrich.xchangestream.okexv3;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import info.bitrich.xchangestream.core.StreamingAccountService;
-import info.bitrich.xchangestream.core.dto.AccountInfoContracts;
 import info.bitrich.xchangestream.okexv3.dto.OkCoinAuthSigner;
-import info.bitrich.xchangestream.okexv3.dto.privatedata.OkExUserInfoResult;
 import io.reactivex.Observable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import org.knowm.xchange.Exchange;
 import org.knowm.xchange.currency.CurrencyPair;
 import org.knowm.xchange.dto.account.AccountInfo;
-import org.knowm.xchange.exceptions.ExchangeException;
+import org.knowm.xchange.dto.account.AccountInfoContracts;
 
 /**
  * Created by Sergey Shurmin on 6/18/17.

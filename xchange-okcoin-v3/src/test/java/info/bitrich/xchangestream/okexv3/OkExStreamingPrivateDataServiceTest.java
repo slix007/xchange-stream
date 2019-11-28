@@ -85,4 +85,56 @@ public class OkExStreamingPrivateDataServiceTest {
 
         exchange.disconnect().subscribe();
     }
+//    @Test
+    public void getAllPrivateDataObservableSwap() throws Exception {
+
+        exchange.streamingService.subscirbeUnknownChannel()
+//                .doOnEach(e -> log.info("error_channel: " + e.toString(), e))
+//                .doOnError(e -> log.info("error_channel: " + e))
+                .subscribe(jsonNode -> log.info("unknown_channel: " + jsonNode.toString()),
+                        e -> log.info("unknown_channel exception: " + e.toString()));
+
+        exchange.reconnectFailure()
+                .doOnNext(System.out::println)
+                .subscribe();
+        exchange.connectionSuccess()
+                .doOnNext(System.out::println)
+                .subscribe();
+        exchange.onDisconnect()
+                .doOnEvent(System.out::println)
+                .subscribe();
+        exchange.subscribePingStats()
+                .map(PingStatEvent::getPingPongMs)
+                .doOnNext(System.out::println)
+                .subscribe();
+
+//        final boolean loginSuccess = exchange.getStreamingPrivateDataService()
+//                .login()
+//                .blockingAwait(5, TimeUnit.SECONDS);
+//        System.out.println("Login success=" + loginSuccess);
+
+        final InstrumentDto instrumentDto = new InstrumentDto(CurrencyPair.ETH_USD, FuturesContract.Swap);
+
+//        final Disposable subscribe = exchange.getStreamingPrivateDataService()
+//                .getAccountInfoObservable(CurrencyPair.ETH_USD, instrumentDto)
+//                .doOnNext(System.out::println)
+//                .take(5)
+//                .subscribe();
+
+        final Disposable subscribe1 = exchange.getStreamingPrivateDataService()
+                .getPositionObservable(instrumentDto)
+                .doOnNext(System.out::println)
+                .take(5)
+                .subscribe();
+//
+//        final Disposable subscribe3 = exchange.getStreamingPrivateDataService()
+//                .getTradesObservable(new InstrumentDto(CurrencyPair.BTC_USD, FuturesContract.ThisWeek))
+//                .doOnNext(System.out::println)
+//                .take(5)
+//                .subscribe();
+
+        Thread.sleep(10000 * 6 * 30);
+
+        exchange.disconnect().subscribe();
+    }
 }

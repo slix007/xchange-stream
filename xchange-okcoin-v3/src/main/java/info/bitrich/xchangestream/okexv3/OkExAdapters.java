@@ -1,29 +1,52 @@
 package info.bitrich.xchangestream.okexv3;
 
-import info.bitrich.xchangestream.core.dto.AccountInfoContracts;
-import info.bitrich.xchangestream.core.dto.Position;
+import info.bitrich.xchangestream.core.dto.PositionStream;
 import info.bitrich.xchangestream.okexv3.dto.marketdata.OkCoinDepth;
 import info.bitrich.xchangestream.okexv3.dto.marketdata.OkcoinTicker;
 import info.bitrich.xchangestream.okexv3.dto.privatedata.OkExPosition;
+import info.bitrich.xchangestream.okexv3.dto.privatedata.OkExSwapUserInfoResult;
 import info.bitrich.xchangestream.okexv3.dto.privatedata.OkExUserInfoResult;
 import info.bitrich.xchangestream.okexv3.dto.privatedata.OkExUserInfoResult.BalanceInfo;
 import info.bitrich.xchangestream.okexv3.dto.privatedata.OkExUserOrder;
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import info.bitrich.xchangestream.okexv3.dto.privatedata.OkexSwapPosition;
+import javafx.geometry.Pos;
 import org.knowm.xchange.currency.Currency;
 import org.knowm.xchange.currency.CurrencyPair;
 import org.knowm.xchange.dto.Order.OrderStatus;
 import org.knowm.xchange.dto.Order.OrderType;
+import org.knowm.xchange.dto.account.AccountInfoContracts;
 import org.knowm.xchange.dto.marketdata.OrderBook;
 import org.knowm.xchange.dto.marketdata.Ticker;
 import org.knowm.xchange.dto.trade.LimitOrder;
 import org.knowm.xchange.okcoin.OkCoinAdapters;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
 public class OkExAdapters {
 
     public OkExAdapters() {
+    }
+
+
+    public static AccountInfoContracts adaptSwapUserInfo(Currency baseTool, OkExSwapUserInfoResult acc) {
+        final String inst = acc.getInstrument_id();
+        if (inst != null && inst.length() > 2 && inst.substring(0, 3).equals(baseTool.getCurrencyCode())) { // BTC, ETH
+            BigDecimal equity = acc.getEquity().setScale(8, 4);
+            BigDecimal margin = acc.getMargin().setScale(8, 4);
+            BigDecimal upl = acc.getUnrealized_pnl().setScale(8, 4);
+            BigDecimal wallet = equity.subtract(upl).setScale(8, 4);
+            BigDecimal available = acc.getTotal_avail_balance().setScale(8, 4);
+//        BigDecimal available = equity.subtract(margin).setScale(8, 4);
+            BigDecimal rpl = acc.getRealized_pnl().setScale(8, 4);
+            BigDecimal riskRate = acc.getMargin_ratio() == null ? BigDecimal.ZERO
+                    : acc.getMargin_ratio().setScale(8, 4);
+            return new AccountInfoContracts(wallet, available, (BigDecimal) null, equity, (BigDecimal) null, (BigDecimal) null, margin, upl, rpl, riskRate);
+
+        }
+        return null;
     }
 
     public static AccountInfoContracts adaptUserInfo(Currency baseTool, OkExUserInfoResult okExUserInfoResult) {
@@ -144,21 +167,58 @@ public class OkExAdapters {
         }
     }
 
-    public static Position adaptPosition(OkExPosition okExPosition) {
-        final BigDecimal longAvailQty = okExPosition.getLongAvailQty();
-        final BigDecimal shortAvailQty = okExPosition.getShortAvailQty();
-        return new Position(
-                okExPosition.getLongQty(),
-                okExPosition.getShortQty(),
-                longAvailQty != null ? longAvailQty : BigDecimal.ZERO,
-                shortAvailQty != null ? shortAvailQty : BigDecimal.ZERO,
-                okExPosition.getLeverage(),
-                okExPosition.getLiquidationPrice(),
-                BigDecimal.ZERO,
-                okExPosition.getLongAvgCost(),
-                okExPosition.getShortAvgCost(),
-                okExPosition.getInstrumentId(),
-                ""
+    public static PositionStream adaptPosition(OkExPosition p) {
+        return new PositionStream(
+                p.getLongQty(),
+                p.getShortQty(),
+                p.getLongAvailQty(),
+                p.getShortAvailQty(),
+                p.getLeverage(),
+                p.getLiquidationPrice(),
+                p.getLongAvgCost(),
+                p.getShortAvgCost(),
+                BigDecimal.ZERO, //mark value
+                p.getInstrumentId(),
+                p.getUpdatedAt().toInstant(),
+                p.toString(),
+                p.getLongPnl().add(p.getShortPnl())
         );
+
     }
+
+    public static PositionStream adaptSwapPosition(OkexSwapPosition p) {
+        final boolean aLong = p.getSide().equals("long");
+        if (aLong) {
+            return new PositionStream(
+                    p.getPosition(),
+                    null,
+                    p.getAvail_position(),
+                    null,
+                    p.getLeverage(),
+                    p.getLiquidation_price(),
+                    p.getAvg_cost(),
+                    null,
+                    BigDecimal.ZERO, //mark value
+                    p.getInstrument_id(),
+                    p.getTimestamp(),
+                    p.toString(),
+                    p.getUnrealized_pnl());
+        }
+        // else short
+        return new PositionStream(
+                null,
+                p.getPosition(),
+                null,
+                p.getAvail_position(),
+                p.getLeverage(),
+                p.getLiquidation_price(),
+                null,
+                p.getAvg_cost(),
+                BigDecimal.ZERO, //mark value
+                p.getInstrument_id(),
+                p.getTimestamp(),
+                p.toString(),
+                p.getUnrealized_pnl());
+    }
+
 }
