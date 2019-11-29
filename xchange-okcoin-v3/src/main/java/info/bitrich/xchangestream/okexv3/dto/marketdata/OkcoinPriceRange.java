@@ -37,4 +37,14 @@ public class OkcoinPriceRange {
     public Instant getTimestamp() {
         return timestamp;
     }
+
+    @Override
+    public String toString() {
+        return "OkcoinPriceRange{" +
+                "highest=" + highest +
+                ", lowest=" + lowest +
+                ", instrumentId='" + instrumentId + '\'' +
+                ", timestamp=" + timestamp +
+                '}';
+    }
 }
