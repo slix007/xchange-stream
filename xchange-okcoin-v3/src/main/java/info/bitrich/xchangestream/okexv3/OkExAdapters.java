@@ -9,7 +9,6 @@ import info.bitrich.xchangestream.okexv3.dto.privatedata.OkExUserInfoResult;
 import info.bitrich.xchangestream.okexv3.dto.privatedata.OkExUserInfoResult.BalanceInfo;
 import info.bitrich.xchangestream.okexv3.dto.privatedata.OkExUserOrder;
 import info.bitrich.xchangestream.okexv3.dto.privatedata.OkexSwapPosition;
-import javafx.geometry.Pos;
 import org.knowm.xchange.currency.Currency;
 import org.knowm.xchange.currency.CurrencyPair;
 import org.knowm.xchange.dto.Order.OrderStatus;
