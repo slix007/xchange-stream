@@ -82,11 +82,12 @@ public class InstrumentDto {
                 expTime = expTime.plusDays(28 * 3 + 7);
             }
         } else if (futuresContract == FuturesContract.BiQuarter) {
-            expTime = LocalDateTime.of(2020, 6, 26, 8, 0, 0);
-            final LocalDateTime plus4Weeks = now.plusDays(14);
-            while (plus4Weeks.isAfter(expTime)) {
-                expTime = expTime.plusDays(28 * 6);
+            expTime = LocalDateTime.of(2018, 9, 28, 8, 0, 0);
+            final LocalDateTime plus2Weeks = now.plusDays(14);
+            while (plus2Weeks.isAfter(expTime)) {
+                expTime = expTime.plusDays(28 * 3 + 7);
             }
+            expTime = expTime.plusDays(28 * 3 + 7);
         } else {
             throw new IllegalArgumentException("Illegal futuresContract " + futuresContract);
         }
