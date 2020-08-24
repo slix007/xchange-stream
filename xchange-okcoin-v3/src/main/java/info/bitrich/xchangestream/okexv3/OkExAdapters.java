@@ -76,7 +76,7 @@ public class OkExAdapters {
         List<LimitOrder> asks = adaptLimitOrders(OrderType.ASK, depth.getAsks(), currencyPair, depth.getTimestamp());
 //        Collections.reverse(asks);
         List<LimitOrder> bids = adaptLimitOrders(OrderType.BID, depth.getBids(), currencyPair, depth.getTimestamp());
-        return new OrderBook(depth.getTimestamp(), asks, bids);
+        return new OrderBook(depth.getTimestamp(), depth.getReceiveTimestamp(), asks, bids);
     }
 
     private static List<LimitOrder> adaptLimitOrders(OrderType type, BigDecimal[][] list, CurrencyPair currencyPair, Date timestamp) {

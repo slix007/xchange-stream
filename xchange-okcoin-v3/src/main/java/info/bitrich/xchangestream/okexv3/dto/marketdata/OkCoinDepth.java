@@ -11,6 +11,7 @@ public class OkCoinDepth {
     private final BigDecimal[][] bids;
     private final String instrumentId;
     private final Date timestamp;
+    private final Date receiveTimestamp;
 
     public OkCoinDepth(
             @JsonProperty("asks") final BigDecimal[][] asks,
@@ -22,6 +23,7 @@ public class OkCoinDepth {
         this.bids = bids;
         this.instrumentId = instrumentId;
         this.timestamp = timestamp;
+        this.receiveTimestamp = new Date();
     }
 
     public BigDecimal[][] getAsks() {
@@ -40,6 +42,10 @@ public class OkCoinDepth {
         return timestamp;
     }
 
+    public Date getReceiveTimestamp() {
+        return receiveTimestamp;
+    }
+
     @Override
     public String toString() {
         return "OkCoinDepth{" +
@@ -47,6 +53,7 @@ public class OkCoinDepth {
                 ", bids=" + Arrays.toString(bids) +
                 ", instrumentId='" + instrumentId + '\'' +
                 ", timestamp=" + timestamp +
+                ", receiveTimestamp=" + receiveTimestamp +
                 '}';
     }
 }
