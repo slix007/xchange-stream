@@ -32,7 +32,7 @@ public class OkExAdapters {
 
     public static AccountInfoContracts adaptSwapUserInfo(Currency baseTool, OkExSwapUserInfoResult acc) {
         final String inst = acc.getInstrument_id();
-        if (inst != null && inst.length() > 2 && inst.substring(0, 3).equals(baseTool.getCurrencyCode())) { // BTC, ETH
+        if (inst != null && inst.length() > 2 && inst.split("-")[0].equals(baseTool.getCurrencyCode())) { // BTC, ETH
             BigDecimal equity = acc.getEquity().setScale(8, 4);
             BigDecimal margin = acc.getMargin().setScale(8, 4);
             BigDecimal upl = acc.getUnrealized_pnl().setScale(8, 4);
@@ -45,7 +45,7 @@ public class OkExAdapters {
             return new AccountInfoContracts(wallet, available, (BigDecimal) null, equity, (BigDecimal) null, (BigDecimal) null, margin, upl, rpl, riskRate);
 
         }
-        return null;
+        throw new IllegalArgumentException("can not adaptSwapUserInfo: " + acc);
     }
 
     public static AccountInfoContracts adaptUserInfo(Currency baseTool, OkExUserInfoResult okExUserInfoResult) {

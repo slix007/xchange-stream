@@ -139,4 +139,22 @@ public class OkExSwapUserInfoResult {
     public void setUnrealized_pnl(BigDecimal unrealized_pnl) {
         this.unrealized_pnl = unrealized_pnl;
     }
+
+    @Override
+    public String toString() {
+        return "OkExSwapUserInfoResult{" +
+                "equity=" + equity +
+                ", fixed_balance=" + fixed_balance +
+                ", instrument_id='" + instrument_id + '\'' +
+                ", maint_margin_ratio=" + maint_margin_ratio +
+                ", margin=" + margin +
+                ", margin_frozen=" + margin_frozen +
+                ", margin_mode='" + margin_mode + '\'' +
+                ", margin_ratio=" + margin_ratio +
+                ", realized_pnl=" + realized_pnl +
+                ", timestamp=" + timestamp +
+                ", total_avail_balance=" + total_avail_balance +
+                ", unrealized_pnl=" + unrealized_pnl +
+                '}';
+    }
 }
